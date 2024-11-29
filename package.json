@@ -1,0 +1,22 @@
+{
+  "name": "stacks2doc",
+  "version": "1.0.0",
+  "description": "FIXME: description",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "reagent": "^1.0.1",
+    "shadow-cljs": "^2.28.15"
+  }
+}
