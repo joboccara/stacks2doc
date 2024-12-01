@@ -42,18 +42,15 @@
       (diagram-textarea diagram)
       (diagram-result @diagram)])
 
-(defn tee [value] (js/console.log "tee" value) value)
-
 (defn diagram-textarea [diagram]
   [:textarea {:type "text"
               :id "diagram-input"
               :name  "diagram-input"
               :value @diagram
-              :on-change #(reset! diagram (tee (-> % .-target .-value)))}])
+              :on-change #(reset! diagram (-> % .-target .-value))}])
 
 (defn diagram-result [diagram]
-  (js/console.log diagram)
-  (let [id (str "mermaid-diagram-" (random-uuid))
+  (let [id (str "mermaid-diagram")
         promise (.render js/window.mermaid "mermaid-css-id", diagram)]
     (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
     [:div {:id id}]))
