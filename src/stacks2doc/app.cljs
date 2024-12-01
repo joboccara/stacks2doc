@@ -56,5 +56,7 @@
 (defn diagram-result [diagram]
   (let [id (str "mermaid-diagram")
         promise (.render js/window.mermaid "mermaid-css-id", diagram)]
+    (set! *warn-on-infer* false)
     (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
+    (set! *warn-on-infer* true)
     [:div {:id id}]))
