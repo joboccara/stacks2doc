@@ -2,18 +2,22 @@
   (:require [reagent.core :as r]
             [stacks2doc.dummy-calculator :as dummy-calculator]))
 
-(declare operands-form operand-input text-input)
+(declare diagram-textarea diagram-result mermaid-form operands-form operand-input operand-textarea)
 
 (def app
-  (let [operands (r/atom {:operand1 2, :operand2 3})]
+  (let [operands (r/atom {:operand1 2, :operand2 3})
+        diagram (r/atom "graph LR;A-->B")]
     (fn []
     (let [value1 (js/parseInt (:operand1 @operands))
           value2 (js/parseInt (:operand2 @operands))
           result (dummy-calculator/my_sum value1 value2)]
       [:<>
        [:div
-        [:p {:class "dummy-style"} (str "This page should display two textboxes to input numbers, and the sum displayed here: " result ". This text should be in red.")]
-        (operands-form operands)]]))))
+        [:p {:class "dummy-style"} (str "Below this there should be two textboxes to input numbers, and the sum displayed here: " result ". This text should be in red.")]
+        (operands-form operands)]
+       [:hr]
+       (mermaid-form diagram)
+       ]))))
 
 (defn operands-form [operands]
   [:form
@@ -23,13 +27,33 @@
 (defn operand-input [operands kw display]
   [:div
    [:label {:for (name kw)} display]
-   (text-input operands kw)])
+   (operand-textarea operands kw)])
 
-(defn text-input [operands kw]
+(defn operand-textarea [operands kw]
   [:textarea {:type "text"
               :id (name kw)
               :name (name kw)
               :value (kw @operands)
               :on-change #(swap! operands assoc kw (-> % .-target .-value))}])
 
-(js/parseInt "42")
+(defn mermaid-form [diagram] 
+    [:div
+      [:p "Below this there should be a text input for a mermaid diagram, that should be rendered below it:"]
+      (diagram-textarea diagram)
+      (diagram-result @diagram)])
+
+(defn tee [value] (js/console.log "tee" value) value)
+
+(defn diagram-textarea [diagram]
+  [:textarea {:type "text"
+              :id "diagram-input"
+              :name  "diagram-input"
+              :value @diagram
+              :on-change #(reset! diagram (tee (-> % .-target .-value)))}])
+
+(defn diagram-result [diagram]
+  (js/console.log diagram)
+  (let [id (str "mermaid-diagram-" (random-uuid))
+        promise (.render js/window.mermaid "mermaid-css-id", diagram)]
+    (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
+    [:div {:id id}]))
