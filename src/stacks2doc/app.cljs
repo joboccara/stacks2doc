@@ -5,22 +5,21 @@
 (declare diagram-textarea diagram-result mermaid-form operands-form operand-input operand-textarea sum-form)
 
 (def app
-  (let [operands (r/atom {:operand1 2, :operand2 3})
-        diagram (r/atom "graph LR;A-->B")]
-    (fn []
-      [:<>
-       (sum-form operands)
-       [:hr]
-       (mermaid-form diagram)
-       ])))
+  (fn []
+    [:<>
+     [sum-form]
+     [:hr]
+     [mermaid-form]]))
 
-(defn sum-form [operands]
-    (let [value1 (js/parseInt (:operand1 @operands))
-          value2 (js/parseInt (:operand2 @operands))
-          result (dummy-calculator/my_sum value1 value2)]
-       [:div
-        [:p {:class "dummy-style"} (str "Below this there should be two textboxes to input numbers, and the sum displayed here: " result ". This text should be in red.")]
-        (operands-form operands)]))
+(defn sum-form []
+  (let [operands (r/atom {:operand1 2, :operand2 3})]
+    (fn []
+      (let [value1 (js/parseInt (:operand1 @operands))
+            value2 (js/parseInt (:operand2 @operands))
+            result (dummy-calculator/my_sum value1 value2)]
+        [:div
+         [:p {:class "dummy-style"} (str "Below this there should be two textboxes to input numbers, and the sum displayed here: " result ". This text should be in red.")]
+         (operands-form operands)]))))
 
 (defn operands-form [operands]
   [:form
@@ -39,11 +38,13 @@
               :value (kw @operands)
               :on-change #(swap! operands assoc kw (-> % .-target .-value))}])
 
-(defn mermaid-form [diagram] 
+(defn mermaid-form []
+  (let [diagram (r/atom "graph LR;A-->B")]
+  (fn []
     [:div
-      [:p "Below this there should be a text input for a mermaid diagram, that should be rendered below it:"]
-      (diagram-textarea diagram)
-      (diagram-result @diagram)])
+     [:p "Below this there should be a text input for a mermaid diagram, that should be rendered below it:"]
+     (diagram-textarea diagram)
+     (diagram-result @diagram)])))
 
 (defn diagram-textarea [diagram]
   [:textarea {:type "text"
