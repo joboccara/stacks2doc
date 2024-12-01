@@ -4,7 +4,19 @@ Install VS Code
 
 Install the Calva plugin (for REPL, formatting, linting, doc, evaluating Clojure expressions directly in the IDE...)
 
-Install [leiningen](https://leiningen.org/)
+## Install
+
+Install [leiningen](https://leiningen.org/):
+
+```
+brew install leiningen
+```
+
+Install dependencies:
+
+```
+npm install
+```
 
 ### To run the tests
 
