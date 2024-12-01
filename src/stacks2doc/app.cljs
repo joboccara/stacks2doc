@@ -2,22 +2,25 @@
   (:require [reagent.core :as r]
             [stacks2doc.dummy-calculator :as dummy-calculator]))
 
-(declare diagram-textarea diagram-result mermaid-form operands-form operand-input operand-textarea)
+(declare diagram-textarea diagram-result mermaid-form operands-form operand-input operand-textarea sum-form)
 
 (def app
   (let [operands (r/atom {:operand1 2, :operand2 3})
         diagram (r/atom "graph LR;A-->B")]
     (fn []
+      [:<>
+       (sum-form operands)
+       [:hr]
+       (mermaid-form diagram)
+       ])))
+
+(defn sum-form [operands]
     (let [value1 (js/parseInt (:operand1 @operands))
           value2 (js/parseInt (:operand2 @operands))
           result (dummy-calculator/my_sum value1 value2)]
-      [:<>
        [:div
         [:p {:class "dummy-style"} (str "Below this there should be two textboxes to input numbers, and the sum displayed here: " result ". This text should be in red.")]
-        (operands-form operands)]
-       [:hr]
-       (mermaid-form diagram)
-       ]))))
+        (operands-form operands)]))
 
 (defn operands-form [operands]
   [:form
