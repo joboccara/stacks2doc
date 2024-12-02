@@ -12,7 +12,7 @@
   (let [[method line-number classname package] (split-frame source-frame)] 
     {:method method
      :line-number (parse-long line-number)
-     :class classname
+     :classname classname
      :package package}))
 
 (defn stack-from-source [source]
