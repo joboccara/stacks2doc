@@ -2,16 +2,20 @@
   (:require
    [clojure.string :as string]))
 
-(def split
+(def split-lines
   (comp #(remove empty? %)
         string/split))
 
-(defn stack-frame-from-source [source]
-  (let [[method line-number] (split (first (split source #", ")) #":")]
+(def split-frame #(clojure.string/split % #":|,\s|\s\(|\)"))
+
+(defn stack-frame-from-source [source-frame]
+  (let [[method line-number classname package] (split-frame source-frame)] 
     {:method method
-     :line-number (parse-long line-number)}))
+     :line-number (parse-long line-number)
+     :class classname
+     :package package}))
 
 (defn stack-from-source [source]
-  (let [stack-frames (split source #"\n")]
+  (let [stack-frames (split-lines source #"\n")]
     (map stack-frame-from-source
          stack-frames)))
