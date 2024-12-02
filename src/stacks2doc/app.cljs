@@ -17,12 +17,11 @@
      [sum-form]]))
 
 (defn real-app []
-  (let [stack-source (r/atom "sendMessage:163, Dispatch (akka.actor.dungeon)
-addLogger:205, LoggingBus (akka.event)")]
+  (let [stack-source (r/atom "")]
     (fn []
     [:<>
      (stack-input stack-source)
-     [mermaid-output (to-flowchart (packages-graph @stack-source)) "packages-graph"]])))
+     (mermaid-output (to-flowchart (packages-graph @stack-source)) "packages-graph")])))
 
 (defn stack-input [stack]
   [:div
@@ -76,9 +75,8 @@ addLogger:205, LoggingBus (akka.event)")]
               :on-change #(reset! diagram (-> % .-target .-value))}])
 
 (defn mermaid-output [diagram id]
-  (fn []
-    (let [promise (.render js/window.mermaid "mermaid-css-id", diagram)]
-      (set! *warn-on-infer* false)
-      (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
-      (set! *warn-on-infer* true)
-      [:div {:id id}])))
+  (let [promise (.render js/window.mermaid "mermaid-css-id", diagram)]
+    (set! *warn-on-infer* false)
+    (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
+    (set! *warn-on-infer* true)
+    [:div {:id id}]))
