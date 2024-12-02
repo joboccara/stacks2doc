@@ -7,7 +7,13 @@
                {:from "a" :to "c"}
                {:from "b" :to "c"}]))
 
-(deftest test-empty-graph
+(deftest test-all-edges-empty-graph
   (let [empty-graph (make-graph [])]
     (testing (is (= []
                     (all-edges empty-graph))))))
+
+(deftest test-all-edges
+  (testing (is (= [{:from "a" :to "b"}
+                   {:from "a" :to "c"}
+                   {:from "b" :to "c"}]
+                  (all-edges TEST_GRAPH)))))

@@ -7,5 +7,5 @@
           edges))
 
 (defn all-edges [graph]
-  (mapcat (fn [{:keys [from to]}] (map #(hash-map :from from :to %) to))
-          graph))
+  (mapcat (fn [[from tos]] (map #(hash-map :from from :to %) tos))
+          (seq graph)))
