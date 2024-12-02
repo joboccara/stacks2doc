@@ -1,15 +1,37 @@
 (ns stacks2doc.app
   (:require [reagent.core :as r]
-            [stacks2doc.dummy-calculator :as dummy-calculator]))
+            [stacks2doc.dummy-calculator :as dummy-calculator]
+            [stacks2doc.stack :refer [packages-graph]]
+            [stacks2doc.graph :refer [make-graph]]
+            [stacks2doc.mermaid :refer [to-flowchart]]))
 
-(declare diagram-textarea diagram-result mermaid-form operands-form operand-input operand-textarea sum-form)
+(declare diagram-textarea mermaid-output operands-form operand-input operand-textarea sum-form)
+
+(declare real-app stack-input)
 
 (def app
   (fn []
     [:<>
-     [sum-form]
+     [real-app]
      [:hr]
-     [mermaid-form]]))
+     [sum-form]]))
+
+(defn real-app []
+  (let [stack-source (r/atom "sendMessage:163, Dispatch (akka.actor.dungeon)
+addLogger:205, LoggingBus (akka.event)")]
+    (fn []
+    [:<>
+     (stack-input stack-source)
+     [mermaid-output (to-flowchart (packages-graph @stack-source)) "packages-graph"]])))
+
+(defn stack-input [stack]
+  [:div
+    [:div "Paste your stack here"]
+    [:textarea {:type "text"
+                :id "diagram-input"
+                :name  "diagram-input"
+                :value @stack
+                :on-change #(reset! stack (-> % .-target .-value))}]])
 
 (defn sum-form []
   (let [operands (r/atom {:operand1 2, :operand2 3})]
@@ -44,7 +66,7 @@
     [:div
      [:p "Below this there should be a text input for a mermaid diagram, that should be rendered below it:"]
      (diagram-textarea diagram)
-     (diagram-result @diagram)])))
+     #_[mermaid-output @diagram "test-mermaid"]])))
 
 (defn diagram-textarea [diagram]
   [:textarea {:type "text"
@@ -53,10 +75,10 @@
               :value @diagram
               :on-change #(reset! diagram (-> % .-target .-value))}])
 
-(defn diagram-result [diagram]
-  (let [id (str "mermaid-diagram")
-        promise (.render js/window.mermaid "mermaid-css-id", diagram)]
-    (set! *warn-on-infer* false)
-    (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
-    (set! *warn-on-infer* true)
-    [:div {:id id}]))
+(defn mermaid-output [diagram id]
+  (fn []
+    (let [promise (.render js/window.mermaid "mermaid-css-id", diagram)]
+      (set! *warn-on-infer* false)
+      (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
+      (set! *warn-on-infer* true)
+      [:div {:id id}])))

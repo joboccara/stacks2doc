@@ -27,6 +27,3 @@
     (make-graph (map (fn [[package next-package]] {:from package :to next-package})
                      (partition 2 packages))))
   )
-
-(all-edges (packages-graph "sendMessage:163, Dispatch (akka.actor.dungeon)
-                 addLogger:205, LoggingBus (akka.event)"))
