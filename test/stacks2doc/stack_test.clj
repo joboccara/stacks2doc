@@ -6,5 +6,6 @@
   (testing (is (= [] (stack-from-source "")))))
 
 (deftest test-parse-method-name
-  (testing (is (= [{:method "main"}]
-                  (stack-from-source "main:11, ChatApp (com.example.chat)")))))
+  (testing (let [stack (stack-from-source "main:11, ChatApp (com.example.chat)")
+                  stack-frame (first stack)]
+              (is (= "main" (:method stack-frame))))))
