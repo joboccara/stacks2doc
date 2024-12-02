@@ -12,11 +12,11 @@
 tell:131, ActorRef (akka.actor)")
 
 (def TEST_CALL_STACK_GRAPH "sendMessage:163, Dispatch (akka.actor.dungeon)
-sendMessage$:157, Dispatch (akka.actor.dungeon)
-sendMessage:410, ActorCell (akka.actor)
-addLogger:205, LoggingBus (akka.event)
-$anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
-apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)")
+                            sendMessage$:157, Dispatch (akka.actor.dungeon)
+                            sendMessage:410, ActorCell (akka.actor)
+                            addLogger:205, LoggingBus (akka.event)
+                            $anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
+                            apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)")
 
 (deftest test-parse-method-name
   (testing (let [stack (stack-from-source TEST_STACK_FRAME)
@@ -51,9 +51,32 @@ apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)")
 
 (deftest test-graph-two-stackframe
   (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
-                        addLogger:205, LoggingBus (akka.event)"
+                               addLogger:205, LoggingBus (akka.event)"
                  ]
              (is (= [{:from "akka.event" :to "akka.actor.dungeon"}] 
                     (all-edges (packages-graph stack-source))))
              ))
   )
+
+(deftest test-graph
+  (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
+                               sendMessage$:157, Dispatch (akka.actor.dungeon)
+                               sendMessage:410, ActorCell (akka.actor)
+                               addLogger:205, LoggingBus (akka.event)
+                               $anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+             (is (= [{:from "akka.event" :to "akka.actor"}, {:from "akka.actor" :to "akka.actor.dungeon"}]
+                    (all-edges (packages-graph stack-source)))))))
+
+(deftest test-graph-2
+  (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
+                               sendMessage$:157, Dispatch (akka.actor.dungeon)
+                               sendMessage:410, ActorCell (akka.actor)
+                               addLogger:205, LoggingBus (akka.event)
+                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+     (is (= (set [{:from "akka.event" :to "foobar"}
+             {:from "foobar" :to "akka.event"}
+             {:from "akka.event" :to "akka.actor"}
+             {:from "akka.actor" :to "akka.actor.dungeon"}])
+            (set (all-edges (packages-graph stack-source))))))))
