@@ -8,3 +8,12 @@
    (let [empty-graph (make-graph [])]
      (is (= "flowchart LR"
             (to-flowchart empty-graph))))))
+
+(def TEST_GRAPH
+  (make-graph [{:from "a" :to "b"}
+               {:from "a" :to "c"}
+               {:from "b" :to "c"}]))
+
+(deftest test-graph
+  (testing (is (= "flowchart LR\na-->b\na-->c\nb-->c"
+                  (to-flowchart TEST_GRAPH)))))
