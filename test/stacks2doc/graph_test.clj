@@ -1,6 +1,6 @@
 (ns stacks2doc.graph-test
   (:require [clojure.test :refer (deftest testing is)]
-            [stacks2doc.graph :refer [all-edges all-nodes make-graph-by-edges make-graph-by-nodes make-graph-from-nodes-and-edges]]))
+            [stacks2doc.graph :refer [all-edges all-nodes make-graph-by-edges make-graph-from-nodes-and-edges]]))
 
 (def TEST_GRAPH
   (make-graph-by-edges [{:from "a" :to "b"}
@@ -17,17 +17,6 @@
                    {:from "a" :to "c"}
                    {:from "b" :to "c"}]
                   (all-edges TEST_GRAPH)))))
-
-(def TEST_DETAILED_ACYCLIC_GRAPH
-  (make-graph-by-nodes [{:node "a" :in "AB" :to ["AB:b", "C:c"]}
-                        {:node "b" :in "AB" :to ["C:c"]}
-                        {:node "c" :in "C" :to []}]))
-
-(deftest test-all-detailed-edges
-  (testing (is (= [{:from "AB:a" :to "AB:b"}
-                   {:from "AB:a" :to "C:c"}
-                   {:from "AB:b" :to "C:c"}]
-                  (all-edges TEST_DETAILED_ACYCLIC_GRAPH)))))
 
 (deftest test-graph-from-nodes-and-egdes
   (let [nodes [{:node "a" :in "AB"}
