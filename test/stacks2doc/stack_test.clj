@@ -4,3 +4,7 @@
 
 (deftest test-empty-stack
   (testing (is (= [] (stack-from-source "")))))
+
+(deftest test-parse-method-name
+  (testing (is (= [{:method "main"}]
+                  (stack-from-source "main:11, ChatApp (com.example.chat)")))))
