@@ -13,7 +13,7 @@
 
 (defn make-graph-by-nodes [nodes]
   (into {} (map
-            (fn [node] (let [key (str (:in node) "." (:node node))]
+            (fn [node] (let [key (str (:in node) ":" (:node node))]
                          [key (update node :to #(into #{} %))]))
             nodes)))
 

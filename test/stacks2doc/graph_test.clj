@@ -19,12 +19,12 @@
                   (all-edges TEST_GRAPH)))))
 
 (def TEST_DETAILED_ACYCLIC_GRAPH
-  (make-graph-by-nodes [{:node "a" :in "AB" :to ["AB.b", "C.c"]}
-                        {:node "b" :in "AB" :to ["C.c"]}
+  (make-graph-by-nodes [{:node "a" :in "AB" :to ["AB:b", "C:c"]}
+                        {:node "b" :in "AB" :to ["C:c"]}
                         {:node "c" :in "C" :to []}]))
 
 (deftest test-all-detailed-edges
-  (testing (is (= [{:from "AB.a" :to "AB.b"}
-                   {:from "AB.a" :to "C.c"}
-                   {:from "AB.b" :to "C.c"}]
+  (testing (is (= [{:from "AB:a" :to "AB:b"}
+                   {:from "AB:a" :to "C:c"}
+                   {:from "AB:b" :to "C:c"}]
                   (all-edges TEST_DETAILED_ACYCLIC_GRAPH)))))
