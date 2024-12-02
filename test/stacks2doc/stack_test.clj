@@ -84,10 +84,10 @@ tell:131, ActorRef (akka.actor)")
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell"}])
                     (set (all-edges (classes-graph stack-source))))))))
 
-#_(deftest test-class-graph_with_duplicates
+(deftest test-class-graph-with-duplicates
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
                                addLogger:205, LoggingBus (akka.event)
-                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
+                               anotherMethod:53, LoggingBus (foobar)
                                $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus"}

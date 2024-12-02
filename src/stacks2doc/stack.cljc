@@ -30,6 +30,11 @@
 
 (defn tee [value] (println "tee" value) value)
 
+(defn same-class? [stack-frame1 stack-frame2]
+  (let [keys [:classname :package]]
+    (= (select-keys stack-frame1 keys)
+       (select-keys stack-frame2 keys))))
+
 (defn classes-graph [source]
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
@@ -37,5 +42,6 @@
                    source)
         edges (map (fn [[stack-frame next-stack-frame]] {:from (str (:package stack-frame) ":" (:classname stack-frame))
                                                          :to (str (:package next-stack-frame) ":" (:classname next-stack-frame))})
-                   (partition 2 1 stack))]
+                   (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
+                           (partition 2 1 stack)))]
     (make-graph-from-nodes-and-edges nodes edges)))
