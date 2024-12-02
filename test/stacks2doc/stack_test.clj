@@ -16,3 +16,13 @@
   (testing (let [stack (stack-from-source TEST_STACK_FRAME)
                  stack-frame (first stack)]
              (is (= 11 (:line-number stack-frame))))))
+
+(deftest test-parse-class-name
+  (testing (let [stack (stack-from-source TEST_STACK_FRAME)
+                 stack-frame (first stack)]
+             (is (= "ChatApp" (:classname stack-frame))))))
+
+(deftest test-parse-package-name
+  (testing (let [stack (stack-from-source TEST_STACK_FRAME)
+                 stack-frame (first stack)]
+             (is (= "com.example.chat" (:package stack-frame))))))
