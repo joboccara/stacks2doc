@@ -8,18 +8,18 @@
 (defn app []
   (let [stack-sources (r/atom [""])]
     (fn []
-    [:<>
-     (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))
-     (mermaid-output (to-flowchart (packages-graph (first @stack-sources))) "packages-graph")])))
+      [:<>
+       (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))
+       (mermaid-output (to-flowchart (packages-graph (first @stack-sources))) "packages-graph")])))
 
 (defn stack-input [stack-sources position]
   [:div
    [:div "Paste your stack here"]
    [:textarea {:type "text"
-                :id "diagram-input"
-                :name  "diagram-input"
-                :value (nth @stack-sources position)
-                :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
+               :id "diagram-input"
+               :name  "diagram-input"
+               :value (nth @stack-sources position)
+               :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
    [:button {:on-click #(swap! stack-sources conj "")} "+"]
    [:button {:on-click #(swap! stack-sources remove-nth position)} "❌"]])
 
