@@ -32,6 +32,11 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-parse-source
   (testing (let [[first-frame second-frame] (stack-from-source TEST_CALL_STACK)]
-             (is (and (= {:method "$bang" :line-number 182 :classname "RepointableActorRef" :package "akka.actor"} first-frame)
-                  (= {:method "tell" :line-number 131 :classname "ActorRef" :package "akka.actor"} second-frame)))
-             )))
+             (is (and (= (:method first-frame) "$bang")
+                      (= (:line-number first-frame) 182)
+                      (= (:classname first-frame) "RepointableActorRef")
+                      (= (:package first-frame) "akka.actor")
+                      (= (:method second-frame) "tell")
+                      (= (:line-number second-frame) 131)
+                      (= (:classname second-frame) "ActorRef")
+                      (= (:package second-frame) "akka.actor"))))))
