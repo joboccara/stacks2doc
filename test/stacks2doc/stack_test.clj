@@ -15,4 +15,4 @@
 (deftest test-parse-line-number
   (testing (let [stack (stack-from-source TEST_STACK_FRAME)
                  stack-frame (first stack)]
-             (is (= "11" (:line-number stack-frame))))))
+             (is (= 11 (:line-number stack-frame))))))

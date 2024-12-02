@@ -9,7 +9,7 @@
 (defn stack-frame-from-source [source]
   (let [[method line-number] (split (first (split source #", ")) #":")]
     {:method method
-     :line-number line-number}))
+     :line-number (parse-long line-number)}))
 
 (defn stack-from-source [source]
   (let [stack-frames (split source #"\n")]
