@@ -24,6 +24,7 @@
 (defn packages-graph [source]
   (let [stack (stack-from-source source)
         packages (map :package stack)]
-    (make-graph (map (fn [[package next-package]] {:from package :to next-package})
-                     (partition 2 packages))))
+    (make-graph (remove nil?
+                 (map (fn [[package next-package]] (if (= package next-package) nil {:from package :to next-package}))
+                      (partition 2 1 packages)))))
   )
