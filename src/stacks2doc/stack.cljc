@@ -2,8 +2,9 @@
   (:require
    [clojure.string :as string]))
 
-(defn split [s re]
-  (remove empty? (string/split s re)))
+(def split
+  (comp #(remove empty? %)
+        string/split))
 
 (defn stack-from-source [source]
   (let [stack-frames (split source #"\n")]
