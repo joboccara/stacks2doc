@@ -1,4 +1,4 @@
-(ns stacks2doc.stack 
+(ns stacks2doc.stack
   (:require
    [clojure.string :as string]))
 
@@ -6,7 +6,12 @@
   (comp #(remove empty? %)
         string/split))
 
+(defn stack-frame-from-source [source]
+  (let [[method line-number] (split (first (split source #", ")) #":")]
+    {:method method
+     :line-number line-number}))
+
 (defn stack-from-source [source]
   (let [stack-frames (split source #"\n")]
-    (map #(hash-map :method (first (split % #":")))
+    (map stack-frame-from-source
          stack-frames)))

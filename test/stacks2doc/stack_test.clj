@@ -5,7 +5,14 @@
 (deftest test-empty-stack
   (testing (is (= [] (stack-from-source "")))))
 
+(def TEST_STACK_FRAME "main:11, ChatApp (com.example.chat)")
+
 (deftest test-parse-method-name
-  (testing (let [stack (stack-from-source "main:11, ChatApp (com.example.chat)")
-                  stack-frame (first stack)]
-              (is (= "main" (:method stack-frame))))))
+  (testing (let [stack (stack-from-source TEST_STACK_FRAME)
+                 stack-frame (first stack)]
+             (is (= "main" (:method stack-frame))))))
+
+(deftest test-parse-line-number
+  (testing (let [stack (stack-from-source TEST_STACK_FRAME)
+                 stack-frame (first stack)]
+             (is (= "11" (:line-number stack-frame))))))
