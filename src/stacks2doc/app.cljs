@@ -6,20 +6,21 @@
 (declare mermaid-output stack-input)
 
 (defn app []
-  (let [stack-source (r/atom "")]
+  (let [stack-sources (r/atom [""])]
     (fn []
     [:<>
-     (stack-input stack-source)
-     (mermaid-output (to-flowchart (packages-graph @stack-source)) "packages-graph")])))
+     (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))
+     (mermaid-output (to-flowchart (packages-graph (first @stack-sources))) "packages-graph")])))
 
-(defn stack-input [stack]
+(defn stack-input [stack-sources position]
   [:div
-    [:div "Paste your stack here"]
-    [:textarea {:type "text"
+   [:div "Paste your stack here"]
+   [:textarea {:type "text"
                 :id "diagram-input"
                 :name  "diagram-input"
-                :value @stack
-                :on-change #(reset! stack (-> % .-target .-value))}]])
+                :value (nth @stack-sources position)
+                :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
+   [:button {:on-click #(swap! stack-sources conj "")} "+"]])
 
 (defn mermaid-output [diagram id]
   (let [promise (.render js/window.mermaid "mermaid-css-id", diagram)]
