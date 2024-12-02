@@ -1,6 +1,7 @@
 (ns stacks2doc.stack-test
   (:require [clojure.test :refer [deftest testing is]]
-            [stacks2doc.stack :refer [stack-from-source]]))
+            [stacks2doc.stack :refer [stack-from-source packages-graph]]
+            [stacks2doc.graph :refer [all-edges]]))
 
 (deftest test-empty-stack
   (testing (is (= [] (stack-from-source "")))))
@@ -9,6 +10,13 @@
 
 (def TEST_CALL_STACK "$bang:182, RepointableActorRef (akka.actor)
 tell:131, ActorRef (akka.actor)")
+
+(def TEST_CALL_STACK_GRAPH "sendMessage:163, Dispatch (akka.actor.dungeon)
+sendMessage$:157, Dispatch (akka.actor.dungeon)
+sendMessage:410, ActorCell (akka.actor)
+addLogger:205, LoggingBus (akka.event)
+$anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
+apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)")
 
 (deftest test-parse-method-name
   (testing (let [stack (stack-from-source TEST_STACK_FRAME)
@@ -32,11 +40,20 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-parse-source
   (testing (let [[first-frame second-frame] (stack-from-source TEST_CALL_STACK)]
-             (is (and (= (:method first-frame) "$bang")
-                      (= (:line-number first-frame) 182)
-                      (= (:classname first-frame) "RepointableActorRef")
-                      (= (:package first-frame) "akka.actor")
-                      (= (:method second-frame) "tell")
-                      (= (:line-number second-frame) 131)
-                      (= (:classname second-frame) "ActorRef")
-                      (= (:package second-frame) "akka.actor"))))))
+             (is (and (= (:method second-frame) "$bang")
+                      (= (:line-number second-frame) 182)
+                      (= (:classname second-frame) "RepointableActorRef")
+                      (= (:package second-frame) "akka.actor")
+                      (= (:method first-frame) "tell")
+                      (= (:line-number first-frame) 131)
+                      (= (:classname first-frame) "ActorRef")
+                      (= (:package first-frame) "akka.actor"))))))
+
+(deftest test-graph-two-stackframe
+  (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
+                        addLogger:205, LoggingBus (akka.event)"
+                 ]
+             (is (= [{:from "akka.event" :to "akka.actor.dungeon"}] 
+                    (all-edges (packages-graph stack-source))))
+             ))
+  )

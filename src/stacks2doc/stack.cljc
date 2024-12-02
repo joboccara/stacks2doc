@@ -1,6 +1,7 @@
 (ns stacks2doc.stack
   (:require
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [stacks2doc.graph :refer [make-graph all-edges]]))
 
 (def split-lines
   (comp #(remove empty? %)
@@ -17,5 +18,15 @@
 
 (defn stack-from-source [source]
   (let [stack-frames (split-lines source #"\n")]
-    (map stack-frame-from-source
-         stack-frames)))
+    (reverse (map stack-frame-from-source
+         stack-frames))))
+
+(defn packages-graph [source]
+  (let [stack (stack-from-source source)
+        packages (map :package stack)]
+    (make-graph (map (fn [[package next-package]] {:from package :to next-package})
+                     (partition 2 packages))))
+  )
+
+(all-edges (packages-graph "sendMessage:163, Dispatch (akka.actor.dungeon)
+                 addLogger:205, LoggingBus (akka.event)"))
