@@ -39,11 +39,11 @@
             nodes)))
 
 (defn all-edges [graph]
-  (mapcat (fn [[id node]] (map #(apply hash-map
-                                       :from id
-                                       :to (:target %)
-                                       (if (nil? (:label %)) [] [:label (:label %)]))
-                               (:to node)))
+  (mapcat (fn [[id node]]
+            (map #(cond-> (hash-map :from id :to (:target %))
+                    (:label %) (assoc :label (:label %))
+                    (:link %) (assoc :link (:link %)))
+                 (:to node)))
           (seq graph)))
 
 (defn all-nodes [graph]
