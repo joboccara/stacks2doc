@@ -6,6 +6,8 @@
                              make-graph-from-nodes-and-edges merge-graphs]]
    [stacks2doc.utils :refer [tee]]))
 
+(defn tee [value]
+  (js/console.log value) value)
 
 (def split-lines
   (comp #(remove empty? %)
@@ -90,7 +92,7 @@
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
-                   stack)
+                   (remove #(get % :skipped) stack))
         edges (mark-skipped
                (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (str (:package stack-frame) ":" (:classname stack-frame)))
                                                           :to (if (:skipped next-stack-frame) :skipped (str (:package next-stack-frame) ":" (:classname next-stack-frame)))
