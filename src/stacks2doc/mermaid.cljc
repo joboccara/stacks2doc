@@ -24,9 +24,9 @@
                               (if (:skipped edge)
                                 (let [skip-id (str "skip!" (:from edge) "!" (:to edge))]
                                   ((let [[from-in to-in] (map #(first (string/split % #":")) [from to])] (if (= from-in to-in) #(str "subgraph " from-in "\n" % "\n" "end") identity))
-                                   (str from " --- " skip-id "@{ shape: text, label: \"...\" }" "\n"
+                                   (str from " ---" edge-label skip-id "@{ shape: text, label: \"...\" }" "\n"
                                         skip-id " --> " to)))
-                                (str from " --> " edge-label to))))
+                                (str from " -->" edge-label to))))
                  graph-edges)]
         (apply str (interpose "\n" (concat
                                     ["flowchart TD"]

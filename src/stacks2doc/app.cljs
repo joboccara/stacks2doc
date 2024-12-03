@@ -12,9 +12,6 @@
 (def base-url (r/atom ""))
 (def file-extension (r/atom ""))
 
-(defn tee [value]
-  (js/console.log value) value)
-
 (defn app []
   (let [stack-sources (r/atom [""])]
     (fn []
@@ -46,13 +43,13 @@
         (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
        (try
          ((if @use-debugging raw-output mermaid-output) (to-flowchart
-                          (if @use-detailed-graph
-                            (classes-graph-from-sources @stack-sources
-                                                        @base-url
-                                                        @file-extension)
-                            (packages-graph (first @stack-sources)))
-                          :detailed @use-detailed-graph
-                          :label @use-label) "graph")
+                                                         (if @use-detailed-graph
+                                                           (classes-graph-from-sources @stack-sources
+                                                                                       @base-url
+                                                                                       @file-extension)
+                                                           (packages-graph (first @stack-sources)))
+                                                         :detailed @use-detailed-graph
+                                                         :label @use-label) "graph")
          (catch :default _
            [:div {:class "text-red-500 font-bold"}
             "Error: Invalid stack trace format."]))])))
