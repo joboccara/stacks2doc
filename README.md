@@ -31,5 +31,8 @@ Start the local server
 ```
 npx shadow-cljs watch app
 ```
-
 Then open http://localhost:3000/ in the browser
+### To update Tailwind CSS
+```
+npx tailwindcss -i ./src/css/tailwind.css -o ./public/css/output.css --watch
+```
