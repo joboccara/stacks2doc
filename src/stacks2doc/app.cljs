@@ -14,7 +14,7 @@
 (defn tee [value]
   (js/console.log value) value)
 
-(defn app [] 
+(defn app []
   (let [stack-sources (r/atom [""])]
     (fn []
       [:div {:class "p-4 space-y-4"}
@@ -26,36 +26,36 @@
                   :on-click #(swap! use-label not)}
          "Toggle Labels"]]
        [:div {:class "space-y-2"}
-        [:label {:class "font-bold text-gray-700"} "Base URL"]
-        [:input {:class "p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 :type "text"
-                 :value (or @base-url "")
-                 :on-change #(reset! base-url (-> % .-target .-value))}]
-        [:label {:class "font-bold text-gray-700"} "File Extension"]
-        [:input {:class "p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                 :type "text"
-                 :value (or @file-extension ".java")
-                 :on-change #(reset! file-extension (-> % .-target .-value))}]]
-       [:div {:class "space-y-4"}
-        [:p {:class "text-gray-600"} (str "Base URL: " @base-url)]
-        [:p {:class "text-gray-600"} (str "File Extension: " @file-extension)]]
+        [:div {:class "flex items-center space-x-2"}
+         [:label {:class "font-bold text-gray-700 w-32"} "Base URL"]
+         [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                  :type "text"
+                  :value (or @base-url "")
+                  :on-change #(reset! base-url (-> % .-target .-value))}]]
+        [:div {:class "flex items-center space-x-2"}
+         [:label {:class "font-bold text-gray-700 w-32"} "File Extension"]
+         [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                  :type "text"
+                  :value (or @file-extension ".java")
+                  :on-change #(reset! file-extension (-> % .-target .-value))}]]]
        [:div {:class "grid grid-cols-3 gap-4"}
-        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))] 
+        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
        (try
          (mermaid-output (to-flowchart
                           (classes-graph-from-sources @stack-sources
-                                                           (tee @base-url)
-                                                           @file-extension)
+                                                      (tee @base-url)
+                                                      @file-extension)
                           :detailed @use-detailed-graph
                           :label @use-label) "graph")
          (catch :default _
            [:div {:class "text-red-500 font-bold"}
             "Error: Invalid stack trace format."]))])))
 
+
 (defn stack-input [stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"}
    [:label {:class "font-bold text-gray-700"} "Stack"]
-   [:textarea {:class "p-4 font-mono text-sm border rounded resize-y whitespace-nowrap overflow-x-auto h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+   [:textarea {:class "p-4 font-mono text-sm border rounded resize-y whitespace-nowrap overflow-x-auto h-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                :wrap "off"
                :type "text"
                :id (str "diagram-input-" position)
