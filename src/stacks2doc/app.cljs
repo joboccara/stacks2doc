@@ -8,8 +8,13 @@
 
 (def use-detailed-graph (r/atom true))
 (def use-label (r/atom true))
+(def base-url (r/atom ""))
+(def file-extension (r/atom ""))
 
-(defn app []
+(defn tee [value]
+  (js/console.log value) value)
+
+(defn app [] 
   (let [stack-sources (r/atom [""])]
     (fn []
       [:div {:class "p-4 space-y-4"}
@@ -20,11 +25,27 @@
         [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
                   :on-click #(swap! use-label not)}
          "Toggle Labels"]]
+       [:div {:class "space-y-2"}
+        [:label {:class "font-bold text-gray-700"} "Base URL"]
+        [:input {:class "p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 :type "text"
+                 :value (or @base-url "")
+                 :on-change #(reset! base-url (-> % .-target .-value))}]
+        [:label {:class "font-bold text-gray-700"} "File Extension"]
+        [:input {:class "p-2 border rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 :type "text"
+                 :value (or @file-extension ".java")
+                 :on-change #(reset! file-extension (-> % .-target .-value))}]]
+       [:div {:class "space-y-4"}
+        [:p {:class "text-gray-600"} (str "Base URL: " @base-url)]
+        [:p {:class "text-gray-600"} (str "File Extension: " @file-extension)]]
        [:div {:class "grid grid-cols-3 gap-4"}
-        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
+        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))] 
        (try
          (mermaid-output (to-flowchart
-                          (classes-graph-from-sources @stack-sources)
+                          (classes-graph-from-sources @stack-sources
+                                                           (tee @base-url)
+                                                           @file-extension)
                           :detailed @use-detailed-graph
                           :label @use-label) "graph")
          (catch :default _

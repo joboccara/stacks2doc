@@ -1,8 +1,8 @@
 (ns stacks2doc.mermaid
-  (:require
+  (:require 
    [stacks2doc.graph :as graph]))
 
-(defn to-flowchart [graph & {:keys [detailed, label] :or {detailed true, label true}}]
+(defn to-flowchart [graph & {:keys [detailed label] :or {detailed true, label true}}]
   (if detailed
     (let [subgraphs
           (map (fn [[group nodes]]
@@ -12,7 +12,10 @@
                         "end")))
                (group-by :in (graph/all-nodes graph)))
           arrows
-          (map (fn [edge] (let [edge-label (if (and label (contains? edge :label)) (str "|" (:label edge) "| ") "")]
+          (map (fn [edge] (let [edge-link (if (contains? edge :link) (edge :link) "")
+                                edge-label (if (and label (contains? edge :label))
+                                             (str "|<a href=\"" edge-link "\" target=\"_blank\">" (:label edge) "</a>| ")
+                                             "")]
                             (str (:from edge) " --> " edge-label (:to edge))))
                (graph/all-edges graph))]
       (apply str (interpose "\n" (concat

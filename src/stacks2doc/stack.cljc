@@ -1,9 +1,11 @@
 (ns stacks2doc.stack
   (:require
    [clojure.string :as string]
+   [stacks2doc.github :refer [github-link]]
    [stacks2doc.graph :refer [make-graph-by-edges
                              make-graph-from-nodes-and-edges merge-graphs]]
-   [clojure.pprint :as pprint]))
+   [stacks2doc.utils :refer [tee]]))
+
 
 (def split-lines
   (comp #(remove empty? %)
@@ -76,8 +78,6 @@
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
-(defn tee [value] (pprint/pprint value) value)
-
 (defn mark-skipped [edges]
   (reduce (fn [result edge]
             (if (= (:from edge) :skipped)
@@ -86,7 +86,7 @@
           []
           edges))
 
-(defn classes-graph-from-one-source [source]
+(defn classes-graph-from-one-source [source base-url extension]
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
@@ -94,12 +94,18 @@
         edges (mark-skipped
                (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (str (:package stack-frame) ":" (:classname stack-frame)))
                                                           :to (if (:skipped next-stack-frame) :skipped (str (:package next-stack-frame) ":" (:classname next-stack-frame)))
-                                                          :label (if (:skipped next-stack-frame) :skipped (:method next-stack-frame))})
+                                                          :label (if (:skipped next-stack-frame) :skipped (:method next-stack-frame))
+                                                          :link (if (:skipped next-stack-frame) :skipped (github-link
+                                                                 (or base-url "")
+                                                                 (if (clojure.string/starts-with? extension ".") extension (str "." extension))
+                                                                 (:package next-stack-frame)
+                                                                 (:classname next-stack-frame)
+                                                                 (:line-number next-stack-frame)))})
                     (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
                             (partition 2 1 stack))))]
     (make-graph-from-nodes-and-edges nodes edges)))
 
-(defn classes-graph-from-sources [sources]
-  (let [graphs (map classes-graph-from-one-source sources)]
+(defn classes-graph-from-sources [sources base-url extension] 
+  (let [graphs (map #(classes-graph-from-one-source % base-url extension) sources)]
     (merge-graphs graphs))
 )
