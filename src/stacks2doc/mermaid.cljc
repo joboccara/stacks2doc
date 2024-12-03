@@ -20,7 +20,7 @@
                                   edge-link (if (contains? edge :link) (edge :link) "")
                                   edge-label (if (and label (contains? edge :label))
                                                (str "|<a href=\"" edge-link "\" target=\"_blank\">" (:label edge) "</a>| ")
-                                               "")]
+                                               " ")]
                               (if (:skipped edge)
                                 (let [skip-id (str "skip!" (:from edge) "!" (:to edge))]
                                   ((let [[from-in to-in] (map #(first (string/split % #":")) [from to])] (if (= from-in to-in) #(str "subgraph " from-in "\n" % "\n" "end") identity))
