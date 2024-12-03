@@ -16,5 +16,8 @@ pom.xml.asc
 .calva/
 /node_modules
 /.shadow-cljs
-public/js/
 .vscode
+
+# Generated files
+public/css/
+public/js/
