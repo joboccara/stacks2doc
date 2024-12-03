@@ -1,7 +1,7 @@
 (ns stacks2doc.stack
   (:require
    [clojure.string :as string]
-   [stacks2doc.graph :refer [make-graph-by-edges make-graph-from-nodes-and-edges]]))
+   [stacks2doc.graph :refer [make-graph-by-edges make-graph-from-nodes-and-edges merge-graphs]]))
 
 (def split-lines
   (comp #(remove empty? %)
@@ -35,7 +35,7 @@
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
-(defn classes-graph [source]
+(defn classes-graph-from-one-source [source]
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
@@ -45,3 +45,8 @@
                    (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
                            (partition 2 1 stack)))]
     (make-graph-from-nodes-and-edges nodes edges)))
+
+(defn classes-graph-from-sources [sources]
+  (let [graphs (map classes-graph-from-one-source sources)]
+    (merge-graphs graphs))
+)

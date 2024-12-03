@@ -43,3 +43,20 @@
 (defn all-nodes [graph]
   (map #(hash-map :node (:node %) :in (:in %))
        (vals graph)))
+
+(defn tee [value] (println "tee" value) value)
+
+(defn merge-graphs [graph-coll]
+  (let [merged-nodes (distinct (flatten (map all-nodes graph-coll)))
+        merged-edges (distinct (flatten (map all-edges graph-coll)))]
+    (tee merged-edges)
+    (make-graph-from-nodes-and-edges merged-nodes merged-edges)
+    ))
+
+
+(def edges [{:from "AB:a" :to "AB:b"}
+            {:from "AB:b" :to "C:c"}
+            {:from "AB:b" :to "D:d"}
+            {:from "AB:a" :to "E:e"}
+            {:from "AB:a" :to "E:e"}])
+(distinct edges)

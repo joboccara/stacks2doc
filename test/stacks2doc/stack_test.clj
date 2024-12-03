@@ -1,6 +1,6 @@
 (ns stacks2doc.stack-test
   (:require [clojure.test :refer [deftest testing is]]
-            [stacks2doc.stack :refer [classes-graph packages-graph stack-from-source]]
+            [stacks2doc.stack :refer [classes-graph-from-one-source packages-graph stack-from-source]]
             [stacks2doc.graph :refer [all-edges]]))
 
 (deftest test-empty-stack
@@ -82,7 +82,7 @@ tell:131, ActorRef (akka.actor)")
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus"}
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell"}])
-                    (set (all-edges (classes-graph stack-source))))))))
+                    (set (all-edges (classes-graph-from-one-source stack-source))))))))
 
 (deftest test-class-graph-with-duplicates
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
@@ -93,4 +93,4 @@ tell:131, ActorRef (akka.actor)")
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus"}
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell"}])
-                    (set (all-edges (classes-graph stack-source))))))))
+                    (set (all-edges (classes-graph-from-one-source stack-source))))))))
