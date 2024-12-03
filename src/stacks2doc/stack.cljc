@@ -43,7 +43,7 @@
        :classname classname
        :package package})))
 
-(defn collapse-unmarked-lines [lines]
+(defn collapse-marked--lines [lines]
   (reduce (fn [result line]
             (if (or (empty? result)
                     (not (and (marked-? line) (marked-? (last result)))))
@@ -52,9 +52,15 @@
           []
           lines))
 
+(defn drop-while-from-last [pred coll]
+  (reverse (drop-while pred (reverse coll))))
+
+(defn trim-top-bottom-marked--lines [lines]
+  (drop-while marked-? (drop-while-from-last marked-? lines)))
+
 (defn stack-from-source [source]
   (let [lines (split-lines source #"\n")
-        stack-frames-source (unmark+-lines (collapse-unmarked-lines (mark-lines lines)))]
+        stack-frames-source (unmark+-lines (trim-top-bottom-marked--lines (collapse-marked--lines (mark-lines lines))))]
     (reverse (map stack-frame-from-source
                   stack-frames-source))))
 

@@ -60,6 +60,20 @@ tell:131, ActorRef (akka.actor)")
                            (and (= (:package frame5) "akka.event") (= (:classname frame5) "ActorCell") (= (:method frame5) "sendMessage"))
                            )))))
 
+(deftest test-unmarked-frames-at-top-and-botton-are-ignored
+  (let [stack-source "sendMessage:410, ActorCell (akka.event)
+                      addLogger:205, LoggingBus (akka.event) <
+                      thirdMethod:53, LoggingBus (foobar)   
+                      secondMethod:53, LoggingBus (foobar) <
+                      firstMethod:129, LoggingBus (foobar)
+                      apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"
+        [frame1 frame2 frame3] (stack-from-source stack-source)]
+             (testing (is (and
+                           (and (= (:package frame1) "foobar") (= (:classname frame1) "LoggingBus") (= (:method frame1) "secondMethod"))
+                           (= frame2 {:skipped true})
+                           (and (= (:package frame3) "akka.event") (= (:classname frame3) "LoggingBus") (= (:method frame3) "addLogger"))
+                           )))))
+
 (deftest test-packages-graph-two-stackframe
   (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
                                addLogger:205, LoggingBus (akka.event)"
