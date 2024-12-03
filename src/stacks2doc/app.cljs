@@ -11,9 +11,19 @@
 (defn app []
   (let [stack-sources (r/atom [""])]
     (fn []
-      [:<>
-       (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))
-       (mermaid-output ((if @use-detailed-graph to-detailed-flowchart to-flowchart) (classes-graph-from-sources @stack-sources)) "graph")])))
+      [:div {:class "p-4 space-y-4"}
+       [:button {:class "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                 :on-click #(swap! use-detailed-graph not)}
+        "Toggle Graph Type"]
+       [:div {:class "grid grid-cols-3 gap-4"}
+        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
+       (try
+         (mermaid-output
+          ((if @use-detailed-graph to-detailed-flowchart to-flowchart)
+           (classes-graph-from-sources @stack-sources)) "graph")
+         (catch :default _
+           [:div {:class "text-red-500 font-bold"}
+            "Error: Invalid stack trace format."]))])))
 
 (defn stack-input [stack-sources position]
   [:div {:class "sidebar"}
