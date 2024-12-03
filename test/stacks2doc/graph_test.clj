@@ -25,14 +25,14 @@
   (let [nodes [{:node "a" :in "AB"}
                {:node "b" :in "AB"}
                {:node "c" :in "C"}]
-        edges [{:from "AB:a" :to "AB:b"}
+        edges [{:from "AB:a" :to "AB:b" :label "myLabel"}
                {:from "AB:a" :to "C:c"}
                {:from "AB:b" :to "C:c"}]
         graph (make-graph-from-nodes-and-edges nodes edges)]
-    (testing (and (same-elements? [{:from "AB:a" :to "AB:b"}
-                                   {:from "AB:a" :to "C:c"}
-                                   {:from "AB:b" :to "C:c"}]
-                                  (all-edges graph))
+    (testing (and (is (same-elements? [{:from "AB:a" :to "AB:b" :label "myLabel"}
+                                       {:from "AB:a" :to "C:c"}
+                                       {:from "AB:b" :to "C:c"}]
+                                      (all-edges graph)))
                   (is (same-elements? [{:node "a" :in "AB"}
                                        {:node "b" :in "AB"}
                                        {:node "c" :in "C"}]

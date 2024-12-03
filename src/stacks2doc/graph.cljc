@@ -4,7 +4,7 @@
 
 ; Internal structure of a graph:
 ;
-; {"AB:a" {:node "a", :in "AB", :to #{{:target "AB:b" :label myMethod}}},
+; {"AB:a" {:node "a", :in "AB", :to #{{:target "AB:b" :label "myMethod"}}},
 ;  "AB:b" {:node "b", :in "AB", :to #{{:target "AB:a"}, {:target "C:c"}}},
 ;  "C:c" {:node "c", :in "C", :to #{}}}
 
@@ -12,13 +12,16 @@
   "edges: [{:from enclosing-graph:name :to enclosing-graph:name}]
    returns: {enclosing-graph:name {:to #{{:target enclosing-graph:name}}}}"
   [edges]
-  (reduce (fn [result {:keys [from to]}]
+  (reduce (fn [result {:keys [from to label]}]
             (update result
-                    from
-                    (fn [value, to] {:to (if (nil? value)
-                                           #{{:target to}}
-                                           (conj (:to value) {:target to}))})
-                    to))
+                    from 
+                    (fn [value to label]
+                      (let [edge {:target to :label label}]
+                        {:to (if (nil? value)
+                              #{edge}
+                              (conj (:to value) edge))}))
+                    to
+                    label))
           {}
           edges))
 
@@ -36,7 +39,11 @@
             nodes)))
 
 (defn all-edges [graph]
-  (mapcat (fn [[id node]] (map #(hash-map :from id :to (:target %)) (:to node)))
+  (mapcat (fn [[id node]] (map #(apply hash-map
+                                       :from id
+                                       :to (:target %)
+                                       (if (nil? (:label %)) [] [:label (:label %)]))
+                               (:to node)))
           (seq graph)))
 
 (defn all-nodes [graph]
