@@ -56,12 +56,12 @@
 
 
 (defn stack-input [stack-sources position]
-  [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"}
+  [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
+         :key (str "diagram-input-" position)}
    [:label {:class "font-bold text-gray-700"} "Stack"]
    [:textarea {:class "p-4 font-mono text-sm border rounded resize-y whitespace-nowrap overflow-x-auto h-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                :wrap "off"
                :type "text"
-               :id (str "diagram-input-" position)
                :name  (str "diagram-input-" position)
                :value (nth @stack-sources position)
                :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
