@@ -12,16 +12,17 @@
   "edges: [{:from enclosing-graph:name :to enclosing-graph:name}]
    returns: {enclosing-graph:name {:to #{{:target enclosing-graph:name}}}}"
   [edges]
-  (reduce (fn [result {:keys [from to label]}]
+  (reduce (fn [result {:keys [from to label skipped]}]
             (update result
                     from 
-                    (fn [value to label]
-                      (let [edge {:target to :label label}]
+                    (fn [value to label skipped]
+                      (let [edge {:target to :label label :skipped skipped}]
                         {:to (if (nil? value)
                               #{edge}
                               (conj (:to value) edge))}))
                     to
-                    label))
+                    label
+                    skipped))
           {}
           edges))
 
@@ -42,7 +43,8 @@
   (mapcat (fn [[id node]]
             (map #(cond-> (hash-map :from id :to (:target %))
                     (:label %) (assoc :label (:label %))
-                    (:link %) (assoc :link (:link %)))
+                    (:link %) (assoc :link (:link %))
+                    (:skipped %) (assoc :skipped (:skipped %)))
                  (:to node)))
           (seq graph)))
 

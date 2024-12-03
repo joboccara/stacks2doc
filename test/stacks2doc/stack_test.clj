@@ -123,5 +123,5 @@ tell:131, ActorRef (akka.actor)")
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "akka.event:SecondLoggingBus" :label "secondMethod" :skipped true}
                           {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod"}
-                          {:from "foobar:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :skipped true}])
+                          {:from "akka.event:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :skipped true}])
                     (set (all-edges (classes-graph-from-one-source stack-source))))))))
