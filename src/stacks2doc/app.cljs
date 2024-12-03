@@ -34,7 +34,8 @@
 (defn stack-input [stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"}
    [:label {:class "font-bold text-gray-700"} "Stack"]
-   [:textarea {:class "p-4 border rounded resize-none h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+   [:textarea {:class "p-4 font-mono text-sm border rounded resize-y whitespace-nowrap overflow-x-auto h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+               :wrap "off"
                :type "text"
                :id (str "diagram-input-" position)
                :name  (str "diagram-input-" position)
@@ -43,7 +44,7 @@
    [:div {:class "flex space-x-2"}
     [:button {:class "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               :on-click #(swap! stack-sources conj "")} "+"]
-    [:button {:class "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+    [:button {:class "bg-gray-200 text-white px-4 py-2 rounded hover:bg-red-600"
               :on-click #(swap! stack-sources remove-nth position)} "❌"]]])
 
 (defn remove-nth [arr n]
