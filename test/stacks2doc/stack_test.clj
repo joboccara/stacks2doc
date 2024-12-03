@@ -46,11 +46,11 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-unmarked-frames-are-reduced-to-dots
   (let [stack-source "sendMessage:410, ActorCell (akka.event)<
-addLogger:205, LoggingBus (akka.event)
-thirdMethod:53, LoggingBus (foobar)<
-secondMethod:53, LoggingBus (foobar)
-firstMethod:129, LoggingBus (foobar)
-apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)<"
+                      addLogger:205, LoggingBus (akka.event)
+                      thirdMethod:53, LoggingBus (foobar)   <
+                      secondMethod:53, LoggingBus (foobar)
+                      firstMethod:129, LoggingBus (foobar)
+                      apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)<"
         [frame1 frame2 frame3 frame4 frame5] (stack-from-source stack-source)]
              (testing (is (and
                            (and (= (:package frame1) "akka.event") (= (:classname frame1) "LoggingBus$$Lambda/0x000000e0011f5b90") (= (:method frame1) "apply"))
@@ -94,9 +94,9 @@ apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)<"
 
 (deftest test-class-graph
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
-addLogger:205, LoggingBus (akka.event)
-$anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
-apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+                               addLogger:205, LoggingBus (akka.event)
+                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "$anonfun$startDefaultLoggers$4"}
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
@@ -104,10 +104,10 @@ apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
 
 (deftest test-class-graph-with-duplicates
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
-addLogger:205, LoggingBus (akka.event)
-secondMethod:53, LoggingBus (foobar)
-firstMethod:129, LoggingBus (foobar)
-apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+                               addLogger:205, LoggingBus (akka.event)
+                               secondMethod:53, LoggingBus (foobar)
+                               firstMethod:129, LoggingBus (foobar)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "firstMethod"}
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])

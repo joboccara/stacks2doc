@@ -1,7 +1,8 @@
 (ns stacks2doc.stack
   (:require
    [clojure.string :as string]
-   [stacks2doc.graph :refer [make-graph-by-edges make-graph-from-nodes-and-edges merge-graphs]]))
+   [stacks2doc.graph :refer [make-graph-by-edges
+                             make-graph-from-nodes-and-edges merge-graphs]]))
 
 (def split-lines
   (comp #(remove empty? %)
@@ -35,7 +36,7 @@
 (defn stack-frame-from-source [source-frame]
   (if (marked-? source-frame)
     {:skipped true}
-    (let [[method line-number classname package] (split-frame (unmark-line source-frame))]
+    (let [[method line-number classname package] (split-frame (string/trim (unmark-line source-frame)))]
       {:method method
        :line-number (parse-long line-number)
        :classname classname
