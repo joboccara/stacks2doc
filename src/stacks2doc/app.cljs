@@ -1,7 +1,7 @@
 (ns stacks2doc.app
   (:require
    [reagent.core :as r]
-   [stacks2doc.mermaid :refer [to-detailed-flowchart to-flowchart]]
+   [stacks2doc.mermaid :refer [to-flowchart]]
    [stacks2doc.stack :refer [classes-graph-from-sources]]))
 
 (declare mermaid-output remove-nth stack-input)
@@ -18,9 +18,9 @@
        [:div {:class "grid grid-cols-3 gap-4"}
         (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
        (try
-         (mermaid-output
-          ((if @use-detailed-graph to-detailed-flowchart to-flowchart)
-           (classes-graph-from-sources @stack-sources)) "graph")
+         (mermaid-output (to-flowchart
+                          (classes-graph-from-sources @stack-sources)
+                          :detailed @use-detailed-graph) "graph")
          (catch :default _
            [:div {:class "text-red-500 font-bold"}
             "Error: Invalid stack trace format."]))])))
