@@ -1,10 +1,10 @@
 (ns stacks2doc.stack-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [stacks2doc.github :refer [github-link]]
    [stacks2doc.graph :refer [all-edges]]
    [stacks2doc.stack :refer [classes-graph-from-one-source packages-graph
-                             stack-from-source]]
-   [stacks2doc.utils :refer [tee]]))
+                             stack-frame-from-source stack-from-source]]))
 
 (deftest test-empty-stack
   (testing (is (= [] (stack-from-source "")))))
@@ -110,17 +110,30 @@ tell:131, ActorRef (akka.actor)")
              {:from "akka.actor" :to "akka.actor.dungeon"}])
             (set (all-edges (packages-graph stack-source))))))))
 
-(deftest test-class-graph
+(defn tee [value]
+  (println "tee" value) value)
+
+(defn github-link-from-source [source code_path extension]
+  (let [stack (stack-frame-from-source source)
+        package (:package stack)
+        classname (:classname stack)
+        line-number (:line-number stack)]
+    (github-link code_path extension package classname line-number)))
+
+(def SOURCE "$anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)")
+
+(deftest test-class-graph 
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
                                addLogger:205, LoggingBus (akka.event)
                                $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
-             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "$anonfun$startDefaultLoggers$4"}
-                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
-                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "$anonfun$startDefaultLoggers$4" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/foobar/LoggingBus.java#L129"}
+                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/LoggingBus.java#L205"}
+                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410"}])
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))
 
 (deftest test-class-graph-with-duplicates 
+  (tee (github-link-from-source SOURCE TEST_BASE_URL TEST_EXTENSION))
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
                                addLogger:205, LoggingBus (akka.event)
                                secondMethod:53, LoggingBus (foobar)
@@ -128,9 +141,9 @@ tell:131, ActorRef (akka.actor)")
                                execute:78, RPCCallExecutor$Policy$Timeout (com.fsmatic.rpc)
                                execute:289, RPCCallExecutor (com.fsmatic.rpc)
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
-             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "firstMethod"}
-                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
-                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "firstMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/foobar/LoggingBus.java#L129"}
+                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/LoggingBus.java#L205"}
+                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410"}])
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))
 
 (deftest test-marked-class-graph
@@ -141,7 +154,7 @@ tell:131, ActorRef (akka.actor)")
                                firstMethod:205, LoggingBus (akka.event)
                                $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
-             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "akka.event:SecondLoggingBus" :label "secondMethod" :skipped true}
-                          {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod"}
-                          {:from "akka.event:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :skipped true}])
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "akka.event:SecondLoggingBus" :label "secondMethod" :skipped true :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/foobar/LoggingBus.java#L129"}
+                          {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/LoggingBus.java#L205"}
+                          {:from "akka.event:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :skipped true :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410"}])
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))
