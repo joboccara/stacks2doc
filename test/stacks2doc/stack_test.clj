@@ -112,3 +112,16 @@ tell:131, ActorRef (akka.actor)")
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
                     (set (all-edges (classes-graph-from-one-source stack-source))))))))
+
+(deftest test-marked-class-graph
+  (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)<
+                               addLogger:205, LoggingBus (akka.event)
+                               thirdMethod:205, ThirdLoggingBus (akka.event) <
+                               secondMethod:205, SecondLoggingBus (akka.event) <
+                               firstMethod:205, LoggingBus (akka.event)
+                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "akka.event:SecondLoggingBus" :label "secondMethod" :skipped true}
+                          {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod"}
+                          {:from "foobar:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :skipped true}])
+                    (set (all-edges (classes-graph-from-one-source stack-source))))))))

@@ -2,7 +2,8 @@
   (:require
    [clojure.string :as string]
    [stacks2doc.graph :refer [make-graph-by-edges
-                             make-graph-from-nodes-and-edges merge-graphs]]))
+                             make-graph-from-nodes-and-edges merge-graphs]]
+   [clojure.pprint :as pprint]))
 
 (def split-lines
   (comp #(remove empty? %)
@@ -69,16 +70,27 @@
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
+(defn tee [value] (pprint/pprint value) value)
+
+(defn mark-skipped [edges]
+  (reduce (fn [result edge]
+            (if (= (:from edge) :skipped)
+              (conj (vec (butlast result)) (assoc (last result) :to (:to edge) :label (:label edge) :skipped true))
+              (conj result edge)))
+          []
+          edges))
+
 (defn classes-graph-from-one-source [source]
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
                    stack)
-        edges (map (fn [[stack-frame next-stack-frame]] {:from (str (:package stack-frame) ":" (:classname stack-frame))
-                                                         :to (str (:package next-stack-frame) ":" (:classname next-stack-frame))
-                                                         :label (:method next-stack-frame)})
-                   (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
-                           (partition 2 1 stack)))]
+        edges (mark-skipped
+               (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (str (:package stack-frame) ":" (:classname stack-frame)))
+                                                          :to (if (:skipped next-stack-frame) :skipped (str (:package next-stack-frame) ":" (:classname next-stack-frame)))
+                                                          :label (if (:skipped next-stack-frame) :skipped (:method next-stack-frame))})
+                    (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
+                            (partition 2 1 stack))))]
     (make-graph-from-nodes-and-edges nodes edges)))
 
 (defn classes-graph-from-sources [sources]
