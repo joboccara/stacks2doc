@@ -8,7 +8,7 @@
 (deftest test-empty-graph
   (testing
    (let [empty-graph (make-graph-by-edges [])]
-     (is (= "flowchart LR"
+     (is (= "flowchart TD"
             (to-flowchart empty-graph))))))
 
 (def TEST_GRAPH
@@ -17,7 +17,7 @@
                         {:from "b" :to "c"}]))
 
 (deftest test-graph
-  (testing (is (= "flowchart LR\na-->c\na-->b\nb-->c"
+  (testing (is (= "flowchart TD\na --> c\na --> b\nb --> c"
                   (to-flowchart TEST_GRAPH)))))
 
 (def TEST_DETAILED_ACYCLIC_GRAPH
@@ -30,5 +30,5 @@
     (make-graph-from-nodes-and-edges nodes edges)))
 
 (deftest test-detailed-graph
-  (testing (is (= "flowchart LR\nsubgraph AB\nAB:a[a]\nAB:b[b]\nend\nsubgraph C\nC:c[c]\nend\nAB:a-->C:c\nAB:a-->AB:b\nAB:b-->C:c"
+  (testing (is (= "flowchart TD\nsubgraph AB\nAB:a[a]\nAB:b[b]\nend\nsubgraph C\nC:c[c]\nend\nAB:a --> C:c\nAB:a --> AB:b\nAB:b --> C:c"
                   (to-detailed-flowchart TEST_DETAILED_ACYCLIC_GRAPH)))))

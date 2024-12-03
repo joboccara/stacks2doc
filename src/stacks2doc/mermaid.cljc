@@ -4,8 +4,8 @@
 
 (defn to-flowchart [graph]
   (let [graph-edges (graph/all-edges graph)
-        mermaid-edges (map #(str (:from %) "-->" (:to %)) graph-edges)]
-    (apply str (interpose "\n" (cons "flowchart LR" mermaid-edges)))))
+        mermaid-edges (map #(str (:from %) " --> " (:to %)) graph-edges)]
+    (apply str (interpose "\n" (cons "flowchart TD" mermaid-edges)))))
 
 (defn to-detailed-flowchart [graph]
   (let [subgraphs
@@ -16,9 +16,9 @@
                       "end")))
              (group-by :in (graph/all-nodes graph)))
         arrows
-        (map (fn [edge] (str (:from edge) "-->" (:to edge)))
+        (map (fn [edge] (str (:from edge) " --> " (:to edge)))
              (graph/all-edges graph))]
     (apply str (interpose "\n" (concat
-                                ["flowchart LR"]
+                                ["flowchart TD"]
                                 subgraphs
                                 arrows)))))
