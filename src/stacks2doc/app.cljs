@@ -13,13 +13,14 @@
        (mermaid-output (to-flowchart (classes-graph-from-sources @stack-sources)) "graph")])))
 
 (defn stack-input [stack-sources position]
-  [:div
-   [:div "Paste your stack here"]
-   [:textarea {:type "text"
-               :id "diagram-input"
-               :name  "diagram-input"
-               :value (nth @stack-sources position)
-               :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
+  [:div {:class "sidebar"}
+   [:div {:class "main-area"}
+    [:div "Paste your stack here"]
+    [:textarea {:type "text"
+                :id "diagram-input"
+                :name  "diagram-input"
+                :value (nth @stack-sources position)
+                :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]]
    [:button {:on-click #(swap! stack-sources conj "")} "+"]
    [:button {:on-click #(swap! stack-sources remove-nth position)} "❌"]])
 
@@ -31,4 +32,4 @@
     (set! *warn-on-infer* false)
     (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
     (set! *warn-on-infer* true)
-    [:div {:id id}]))
+    [:div {:id id :class "display"}]))
