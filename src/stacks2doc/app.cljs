@@ -40,7 +40,8 @@
                   :value (or @file-extension ".java")
                   :on-change #(reset! file-extension (-> % .-target .-value))}]]]
        [:div {:class "grid grid-cols-3 gap-4"}
-        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))]
+        (let [stack-sources-value @stack-sources]
+          (map #(stack-input stack-sources stack-sources-value %) (vec (range (count @stack-sources)))))]
        (try
          ((if @use-debugging raw-output mermaid-output) (to-flowchart
                                                          (if @use-detailed-graph
@@ -55,7 +56,7 @@
             "Error: Invalid stack trace format."]))])))
 
 
-(defn stack-input [stack-sources position]
+(defn stack-input [stack-sources-ref stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
          :key (str "diagram-input-" position)}
    [:label {:class "font-bold text-gray-700"} "Stack"]
@@ -63,14 +64,14 @@
                :wrap "off"
                :type "text"
                :name  (str "diagram-input-" position)
-               :value (nth @stack-sources position)
-               :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
+               :value (nth stack-sources position)
+               :on-change #(swap! stack-sources-ref assoc position (-> % .-target .-value))}]
    [:div {:class "flex space-x-2"}
     [:button {:class "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-              :on-click #(swap! stack-sources conj "")} "+"]
+              :on-click #(swap! stack-sources-ref conj "")} "+"]
     (when (> position 0)
       [:button {:class "bg-gray-200 text-white px-4 py-2 rounded hover:bg-red-600"
-                :on-click #(swap! stack-sources remove-nth position)} "❌"])]])
+                :on-click #(swap! stack-sources-ref remove-nth position)} "❌"])]])
 
 (defn remove-nth [arr n]
   (vec (concat (subvec arr 0 n) (subvec arr (inc n)))))
