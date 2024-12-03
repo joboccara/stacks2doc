@@ -21,8 +21,8 @@
                                    link (assoc :link link)
                                    skipped (assoc :skipped skipped))]
                         {:to (if (nil? value)
-                              #{edge}
-                              (conj (:to value) edge))}))
+                               #{edge}
+                               (conj (:to value) edge))}))
                     to
                     label
                     link
