@@ -1,7 +1,9 @@
 (ns stacks2doc.stack-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [stacks2doc.stack :refer [classes-graph-from-one-source packages-graph stack-from-source]]
-            [stacks2doc.graph :refer [all-edges]]))
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [stacks2doc.graph :refer [all-edges]]
+   [stacks2doc.stack :refer [classes-graph-from-one-source packages-graph
+                             stack-from-source]]))
 
 (deftest test-empty-stack
   (testing (is (= [] (stack-from-source "")))))
@@ -41,6 +43,22 @@ tell:131, ActorRef (akka.actor)")
                       (= (:line-number first-frame) 131)
                       (= (:classname first-frame) "ActorRef")
                       (= (:package first-frame) "akka.actor"))))))
+
+(deftest test-unmarked-frames-are-reduced-to-dots
+  (let [stack-source "sendMessage:410, ActorCell (akka.event)<
+addLogger:205, LoggingBus (akka.event)
+thirdMethod:53, LoggingBus (foobar)<
+secondMethod:53, LoggingBus (foobar)
+firstMethod:129, LoggingBus (foobar)
+apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)<"
+        [frame1 frame2 frame3 frame4 frame5] (stack-from-source stack-source)]
+             (testing (is (and
+                           (and (= (:package frame1) "akka.event") (= (:classname frame1) "LoggingBus$$Lambda/0x000000e0011f5b90") (= (:method frame1) "apply"))
+                           (= frame2 {:skipped true})
+                           (and (= (:package frame3) "foobar") (= (:classname frame3) "LoggingBus") (= (:method frame3) "thirdMethod"))
+                           (= frame4 {:skipped true})
+                           (and (= (:package frame5) "akka.event") (= (:classname frame5) "ActorCell") (= (:method frame5) "sendMessage"))
+                           )))))
 
 (deftest test-packages-graph-two-stackframe
   (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)

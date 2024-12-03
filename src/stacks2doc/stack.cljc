@@ -9,17 +9,52 @@
 
 (def split-frame #(clojure.string/split % #":|,\s|\s\(|\)"))
 
+(defn marked+? [line]
+  (= (last line) \<))
+
+(defn marked-? [line]
+  (= (last line) \-))
+
+(defn marked? [line]
+  (or (marked+? line) (marked-? line)))
+
+(defn mark- [line]
+  (str line "-"))
+
+(defn mark-lines [lines]
+  (if (not-any? marked+? lines)
+      lines
+      (map #(if (marked+? %) % (mark- %)) lines)))
+
+(defn unmark-line [line]
+  (if (marked? line) (subs line 0 (dec (count line))) line))
+
+(defn unmark+-lines [lines]
+  (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
+
 (defn stack-frame-from-source [source-frame]
-  (let [[method line-number classname package] (split-frame source-frame)]
-    {:method method
-     :line-number (parse-long line-number)
-     :classname classname
-     :package package}))
+  (if (marked-? source-frame)
+    {:skipped true}
+    (let [[method line-number classname package] (split-frame (unmark-line source-frame))]
+      {:method method
+       :line-number (parse-long line-number)
+       :classname classname
+       :package package})))
+
+(defn collapse-unmarked-lines [lines]
+  (reduce (fn [result line]
+            (if (or (empty? result)
+                    (not (and (marked-? line) (marked-? (last result)))))
+              (conj result line)
+              result))
+          []
+          lines))
 
 (defn stack-from-source [source]
-  (let [stack-frames (split-lines source #"\n")]
+  (let [lines (split-lines source #"\n")
+        stack-frames-source (unmark+-lines (collapse-unmarked-lines (mark-lines lines)))]
     (reverse (map stack-frame-from-source
-                  stack-frames))))
+                  stack-frames-source))))
 
 (defn packages-graph [source]
   (let [stack (stack-from-source source)
@@ -27,8 +62,6 @@
     (make-graph-by-edges (remove nil?
                                  (map (fn [[package next-package]] (if (= package next-package) nil {:from package :to next-package}))
                                       (partition 2 1 packages))))))
-
-(defn tee [value] (println "tee" value) value)
 
 (defn same-class? [stack-frame1 stack-frame2]
   (let [keys [:classname :package]]
