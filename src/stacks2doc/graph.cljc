@@ -1,4 +1,6 @@
-(ns stacks2doc.graph)
+(ns stacks2doc.graph
+  (:require
+   [stacks2doc.utils :refer [tee]]))
 
 ; Internal structure of a graph:
 ;
@@ -12,7 +14,7 @@
   [edges]
   (reduce (fn [result {:keys [from to]}]
             (update result
-                    from 
+                    from
                     (fn [value, to] {:to (if (nil? value)
                                            #{{:target to}}
                                            (conj (:to value) {:target to}))})
@@ -20,21 +22,18 @@
           {}
           edges))
 
- (defn make-graph-from-nodes-and-edges
-   "nodes: [{:node name :in enclosing-graph}]
+(defn make-graph-from-nodes-and-edges
+  "nodes: [{:node name :in enclosing-graph}]
     edges: [{:from enclosing-graph:name :to enclosing-graph:name (:label myLabel)}]
     returns: graph"
-    [nodes edges]
-   (let [graph-with-keys-and-to (make-graph-by-edges edges)]
-     (reduce (fn [result {:keys [node in]}]
-               (update result
-                       (str in ":" node)
-                       #(assoc % :node node :in in)))
-             graph-with-keys-and-to
-             nodes))
-   )
-
- (defn tee [value] (println "tee" value) value)
+  [nodes edges]
+  (let [graph-with-keys-and-to (make-graph-by-edges edges)]
+    (reduce (fn [result {:keys [node in]}]
+              (update result
+                      (str in ":" node)
+                      #(assoc % :node node :in in)))
+            graph-with-keys-and-to
+            nodes)))
 
 (defn all-edges [graph]
   (mapcat (fn [[id node]] (map #(hash-map :from id :to (:target %)) (:to node)))
@@ -44,19 +43,8 @@
   (map #(hash-map :node (:node %) :in (:in %))
        (vals graph)))
 
-(defn tee [value] (println "tee" value) value)
-
 (defn merge-graphs [graph-coll]
   (let [merged-nodes (distinct (flatten (map all-nodes graph-coll)))
         merged-edges (distinct (flatten (map all-edges graph-coll)))]
     (tee merged-edges)
-    (make-graph-from-nodes-and-edges merged-nodes merged-edges)
-    ))
-
-
-(def edges [{:from "AB:a" :to "AB:b"}
-            {:from "AB:b" :to "C:c"}
-            {:from "AB:b" :to "D:d"}
-            {:from "AB:a" :to "E:e"}
-            {:from "AB:a" :to "E:e"}])
-(distinct edges)
+    (make-graph-from-nodes-and-edges merged-nodes merged-edges)))
