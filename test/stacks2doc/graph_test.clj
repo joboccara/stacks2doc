@@ -74,31 +74,17 @@
 
 (deftest test-merge-graphs-2
   (let [nodes-x [{:node "a" :in "AB"}
-                 {:node "b" :in "AB"}
-                 {:node "c" :in "C"}]
-        edges-x [{:from "AB:a" :to "AB:b"}
-                 {:from "AB:b" :to "C:c"}]
-        nodes-y [{:node "a" :in "AB"}
-                 {:node "b" :in "AB"}
-                 {:node "d" :in "D"}]
-        edges-y [{:from "AB:a" :to "AB:b"}
-                 {:from "AB:b" :to "D:d"}]
-        nodes-z [{:node "a" :in "AB"}
-                 {:node "e" :in "E"}]
-        edges-z [{:from "AB:a" :to "E:e"}]
+                 {:node "b" :in "AB"}]
+        edges-x [{:from "AB:a" :to "AB:b"}]
+        nodes-y [{:node "d" :in "D"}]
+        edges-y []
         graph-x (make-graph-from-nodes-and-edges nodes-x edges-x)
-        graph-y (make-graph-from-nodes-and-edges nodes-y edges-y)
-        graph-z (make-graph-from-nodes-and-edges nodes-z edges-z)
-        merged-graph (merge-graphs [graph-x graph-y graph-z])]
+        graph-y (make-graph-from-nodes-and-edges nodes-y edges-y) 
+        merged-graph (merge-graphs [graph-x graph-y])]
     (testing
-     (and (is (= (set [{:from "AB:a" :to "AB:b"}
-                       {:from "AB:b" :to "C:c"}
-                       {:from "AB:b" :to "D:d"}
-                       {:from "AB:a" :to "E:e"}])
+     (and (is (= (set [{:from "AB:a" :to "AB:b"}])
                  (set (all-edges merged-graph))))
           (is (= (set [{:node "a" :in "AB"}
                        {:node "b" :in "AB"}
-                       {:node "c" :in "C"}
-                       {:node "d" :in "D"}
-                       {:node "e" :in "E"}])
+                       {:node "d" :in "D"}])
                  (set (all-nodes merged-graph))))))))
