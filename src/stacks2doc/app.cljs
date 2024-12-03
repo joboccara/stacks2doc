@@ -65,8 +65,9 @@
    [:div {:class "flex space-x-2"}
     [:button {:class "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
               :on-click #(swap! stack-sources conj "")} "+"]
-    [:button {:class "bg-gray-200 text-white px-4 py-2 rounded hover:bg-red-600"
-              :on-click #(swap! stack-sources remove-nth position)} "❌"]]])
+    (when (> position 0)
+      [:button {:class "bg-gray-200 text-white px-4 py-2 rounded hover:bg-red-600"
+                :on-click #(swap! stack-sources remove-nth position)} "❌"])]])
 
 (defn remove-nth [arr n]
   (vec (concat (subvec arr 0 n) (subvec arr (inc n)))))
