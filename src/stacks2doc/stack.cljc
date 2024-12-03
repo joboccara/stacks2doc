@@ -41,7 +41,8 @@
                               :in (:package %))
                    stack)
         edges (map (fn [[stack-frame next-stack-frame]] {:from (str (:package stack-frame) ":" (:classname stack-frame))
-                                                         :to (str (:package next-stack-frame) ":" (:classname next-stack-frame))})
+                                                         :to (str (:package next-stack-frame) ":" (:classname next-stack-frame))
+                                                         :label (:method next-stack-frame)})
                    (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
                            (partition 2 1 stack)))]
     (make-graph-from-nodes-and-edges nodes edges)))

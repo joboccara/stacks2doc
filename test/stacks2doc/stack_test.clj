@@ -76,21 +76,21 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-class-graph
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
-                               addLogger:205, LoggingBus (akka.event)
-                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
-                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
-             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus"}
-                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus"}
-                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell"}])
+addLogger:205, LoggingBus (akka.event)
+$anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
+apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "$anonfun$startDefaultLoggers$4"}
+                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
+                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
                     (set (all-edges (classes-graph-from-one-source stack-source))))))))
 
 (deftest test-class-graph-with-duplicates
   (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)
-                               addLogger:205, LoggingBus (akka.event)
-                               anotherMethod:53, LoggingBus (foobar)
-                               $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
-                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
-             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus"}
-                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus"}
-                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell"}])
+addLogger:205, LoggingBus (akka.event)
+secondMethod:53, LoggingBus (foobar)
+firstMethod:129, LoggingBus (foobar)
+apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
+             (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "firstMethod"}
+                          {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger"}
+                          {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage"}])
                     (set (all-edges (classes-graph-from-one-source stack-source))))))))
