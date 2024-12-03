@@ -1,19 +1,23 @@
 (ns stacks2doc.app
-  (:require [reagent.core :as r]
-            [stacks2doc.stack :refer [classes-graph-from-sources]]
-            [stacks2doc.mermaid :refer [to-flowchart]]))
+  (:require
+   [reagent.core :as r]
+   [stacks2doc.mermaid :refer [to-detailed-flowchart to-flowchart]]
+   [stacks2doc.stack :refer [classes-graph-from-sources]]))
 
 (declare mermaid-output remove-nth stack-input)
+
+(def use-detailed-graph (r/atom true))
 
 (defn app []
   (let [stack-sources (r/atom [""])]
     (fn []
       [:<>
        (map #(stack-input stack-sources %) (vec (range (count @stack-sources))))
-       (mermaid-output (to-flowchart (classes-graph-from-sources @stack-sources)) "graph")])))
+       (mermaid-output ((if @use-detailed-graph to-detailed-flowchart to-flowchart) (classes-graph-from-sources @stack-sources)) "graph")])))
 
 (defn stack-input [stack-sources position]
   [:div {:class "sidebar"}
+   [:button {:on-click #(swap! use-detailed-graph not)}]
    [:div {:class "main-area"}
     [:div "Paste your stack here"]
     [:textarea {:type "text"
