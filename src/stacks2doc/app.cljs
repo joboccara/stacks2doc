@@ -26,17 +26,19 @@
             "Error: Invalid stack trace format."]))])))
 
 (defn stack-input [stack-sources position]
-  [:div {:class "sidebar"}
-   [:button {:on-click #(swap! use-detailed-graph not)}]
-   [:div {:class "main-area"}
-    [:div "Paste your stack here"]
-    [:textarea {:type "text"
-                :id "diagram-input"
-                :name  "diagram-input"
-                :value (nth @stack-sources position)
-                :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]]
-   [:button {:on-click #(swap! stack-sources conj "")} "+"]
-   [:button {:on-click #(swap! stack-sources remove-nth position)} "❌"]])
+  [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"}
+   [:label {:class "font-bold text-gray-700"} "Stack"]
+   [:textarea {:class "p-4 border rounded resize-none h-32 focus:outline-none focus:ring-2 focus:ring-blue-500"
+               :type "text"
+               :id (str "diagram-input-" position)
+               :name  (str "diagram-input-" position)
+               :value (nth @stack-sources position)
+               :on-change #(swap! stack-sources assoc position (-> % .-target .-value))}]
+   [:div {:class "flex space-x-2"}
+    [:button {:class "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              :on-click #(swap! stack-sources conj "")} "+"]
+    [:button {:class "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              :on-click #(swap! stack-sources remove-nth position)} "❌"]]])
 
 (defn remove-nth [arr n]
   (vec (concat (subvec arr 0 n) (subvec arr (inc n)))))
@@ -46,4 +48,5 @@
     (set! *warn-on-infer* false)
     (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
     (set! *warn-on-infer* true)
-    [:div {:id id :class "display"}]))
+    [:div {:id id
+           :class "bg-gray-100 p-4 border border-gray-300 rounded-md shadow-md overflow-auto"}]))
