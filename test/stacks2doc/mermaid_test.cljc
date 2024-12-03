@@ -15,5 +15,5 @@
                         {:from "b" :to "c"}]))
 
 (deftest test-graph
-  (testing (is (= "flowchart LR\na-->b\na-->c\nb-->c"
+  (testing (is (= "flowchart LR\na-->c\na-->b\nb-->c"
                   (to-flowchart TEST_GRAPH)))))

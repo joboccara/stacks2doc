@@ -39,7 +39,7 @@
   (let [stack (stack-from-source source)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
-                   source)
+                   stack)
         edges (map (fn [[stack-frame next-stack-frame]] {:from (str (:package stack-frame) ":" (:classname stack-frame))
                                                          :to (str (:package next-stack-frame) ":" (:classname next-stack-frame))})
                    (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
