@@ -11,21 +11,23 @@ handle:75, RequestHandler (javax.servlet.http)
 doGet:56, Servlet (javax.servlet)
 > get:25, PipelineResource (javax.ws.rs.core)")
 
-(def demo-stack-2 "execute:89, ExecutorService (java.util.concurrent)
-run:112, FutureTask (java.util.concurrent)
-> doPost:45, HttpServlet (javax.servlet.http)
-service:90, Servlet (javax.servlet)
-handleRequest:210, SpringDispatcher (org.springframework.web)
-> handle:60, RestController (org.springframework.web.bind.annotation)
-read:52, InputStreamReader (java.io)")
-
-(def demo-stack-3 ">initialize:102, ApplicationContext (org.springframework.context)
+(def demo-stack-2 "> initialize:102, ApplicationContext (org.springframework.context)
 createBean:84, BeanFactory (org.springframework.beans.factory)
 > execute:45, RestTemplate (org.springframework.web.client)
 performRequest:122, OkHttpClient (okhttp3)
 call:67, Callable (java.util.concurrent)
 > process:50, HttpRequestHandler (javax.ws.rs.core)
-close:25, FileInputStream (java.io)")
+close:25, FileInputStream (java.io)
+> handle:60, RestController (org.springframework.annotation)")
+
+(def demo-stack-3 "execute:89, ExecutorService (java.util.concurrent)
+run:112, FutureTask (java.util.concurrent)
+> doPost:45, HttpServlet (javax.servlet.http)
+service:90, Servlet (javax.servlet)
+handleRequest:210, SpringDispatcher (org.springframework.web)
+> handle:60, RestController (org.springframework.annotation)
+read:52, InputStreamReader (java.io)")
+
 
 (defn demo-app []
   ;; Initialize the stack-sources with predefined values
