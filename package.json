@@ -12,7 +12,7 @@
     "dev:cljs": "shadow-cljs watch app",
     "dev:css": "tailwindcss -i ./src/css/tailwind.css -o ./public/css/output.css --watch",
     "dev": "npm-run-all --parallel dev:*",
-    "build": "shadow-cljs release app && tailwindcss -i ./src/css/tailwind.css -o ./public/css/output.css"
+    "build": "shadow-cljs compile app && tailwindcss -i ./src/css/tailwind.css -o ./public/css/output.css"
   },
   "keywords": [],
   "author": "",
