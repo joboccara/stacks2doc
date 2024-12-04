@@ -6,7 +6,7 @@
 
 (declare mermaid-output raw-output remove-nth stack-input)
 
-(def use-detailed-graph (r/atom true))
+(def use-classes-graph (r/atom false))
 (def use-label (r/atom true))
 (def use-debugging (r/atom false))
 (def base-url (r/atom ""))
@@ -18,8 +18,8 @@
       [:div {:class "p-4 space-y-4"}
        [:div {:class "space-x-4"}
         [:button {:class "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  :on-click #(swap! use-detailed-graph not)}
-         "Toggle Graph Type"]
+                  :on-click #(swap! use-classes-graph not)}
+         (if @use-classes-graph "Display package diagram" "Display class diagram")]
         [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
                   :on-click #(swap! use-label not)}
          "Toggle Labels"]
@@ -44,12 +44,12 @@
           (map #(stack-input stack-sources stack-sources-value %) (vec (range (count @stack-sources)))))]
        (try
          ((if @use-debugging raw-output mermaid-output) (to-flowchart
-                                                         (if @use-detailed-graph
+                                                         (if @use-classes-graph
                                                            (classes-graph-from-sources @stack-sources
                                                                                        @base-url
                                                                                        @file-extension)
                                                            (packages-graph (first @stack-sources)))
-                                                         :detailed @use-detailed-graph
+                                                         :detailed @use-classes-graph
                                                          :label @use-label) "graph")
          (catch :default _
            [:div {:class "text-red-500 font-bold"}
