@@ -7,7 +7,7 @@
 (declare mermaid-output raw-output remove-nth stack-input)
 
 (def use-classes-graph (r/atom false))
-(def use-label (r/atom true))
+(def use-label (r/atom false))
 (def use-debugging (r/atom false))
 (def base-url (r/atom ""))
 (def file-extension (r/atom ""))
@@ -20,12 +20,13 @@
         [:button {:class "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   :on-click #(swap! use-classes-graph not)}
          (if @use-classes-graph "Display package diagram" "Display class diagram")]
-        [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                  :on-click #(swap! use-label not)}
-         "Toggle Labels"]
-        [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-                  :on-click #(swap! use-debugging not)}
-         "Toggle Debug"]]
+        (when @use-classes-graph
+          [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                   :on-click #(swap! use-label not)}
+         (if @use-label "Hide method calls" "Show method calls")])
+        (when false [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                              :on-click #(swap! use-debugging not)}
+         "Toggle Debug"])]
        [:div {:class "space-y-2"}
         [:div {:class "flex items-center space-x-2"}
          [:label {:class "font-bold text-gray-700 w-32"} "Base URL"]
