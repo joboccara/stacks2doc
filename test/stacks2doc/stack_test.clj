@@ -106,6 +106,19 @@ tell:131, ActorRef (akka.actor)")
                           {:from "akka.actor" :to "akka.actor.dungeon"}])
                     (set (all-edges (packages-graph stack-source))))))))
 
+(deftest test-marked-packages-graph
+  (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
+                               sendMessage$:157, Dispatch (akka.actor.dungeon) <
+                               sendMessage:410, ActorCell (akka.other) <
+                               sendMessage:410, ActorCell (akka.actor)
+                               addLogger:205, LoggingBus (akka.event) <
+                               $anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
+                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
+             (is (= [{:from "akka.event" :to "akka.event" :skipped true}
+                     {:from "akka.event" :to "akka.other" :skipped true}
+                     {:from "akka.other" :to "akka.actor.dungeon"}]
+                    (all-edges (packages-graph stack-source)))))))
+
 (defn github-link-from-source [source code_path extension]
   (let [stack (stack-frame-from-source source)
         package (:package stack)

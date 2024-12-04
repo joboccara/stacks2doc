@@ -65,18 +65,6 @@
     (reverse (map stack-frame-from-source
                   stack-frames-source))))
 
-(defn packages-graph [source]
-  (let [stack (stack-from-source source)
-        packages (map :package stack)]
-    (make-graph-by-edges (remove nil?
-                                 (map (fn [[package next-package]] (if (= package next-package) nil {:from package :to next-package}))
-                                      (partition 2 1 packages))))))
-
-(defn same-class? [stack-frame1 stack-frame2]
-  (let [keys [:classname :package]]
-    (= (select-keys stack-frame1 keys)
-       (select-keys stack-frame2 keys))))
-
 (defn mark-skipped [edges]
   (reduce (fn [result edge]
             (if (= (:from edge) :skipped)
@@ -84,6 +72,23 @@
               (conj result edge)))
           []
           edges))
+
+(defn same-package? [stack-frame1 stack-frame2]
+  (let [keys [:package]]
+    (= (select-keys stack-frame1 keys)
+       (select-keys stack-frame2 keys))))
+
+(defn packages-graph [source]
+  (let [stack (stack-from-source source)]
+    (make-graph-by-edges
+     (mark-skipped (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (:package stack-frame))
+                                                                     :to (if (:skipped next-stack-frame) :skipped (:package next-stack-frame))})
+                               (remove (fn [[stack-frame next-stack-frame]] (same-package? stack-frame next-stack-frame)) (partition 2 1 stack)))))))
+
+(defn same-class? [stack-frame1 stack-frame2]
+  (let [keys [:classname :package]]
+    (= (select-keys stack-frame1 keys)
+       (select-keys stack-frame2 keys))))
 
 (defn classes-graph-from-one-source [source base-url extension]
   (let [stack (stack-from-source source)
