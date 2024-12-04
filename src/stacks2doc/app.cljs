@@ -22,11 +22,11 @@
          (if @use-classes-graph "Display package diagram" "Display class diagram")]
         (when @use-classes-graph
           [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                   :on-click #(swap! use-label not)}
-         (if @use-label "Hide method calls" "Show method calls")])
+                    :on-click #(swap! use-label not)}
+           (if @use-label "Hide method calls" "Show method calls")])
         (when false [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                               :on-click #(swap! use-debugging not)}
-         "Toggle Debug"])]
+                     "Toggle Debug"])]
        [:div {:class "space-y-2"}
         [:div {:class "flex items-center space-x-2"}
          [:label {:class "font-bold text-gray-700 w-32"} "Base URL"]
