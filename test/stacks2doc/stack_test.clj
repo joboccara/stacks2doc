@@ -50,12 +50,12 @@ tell:131, ActorRef (akka.actor)")
                       (= (:package first-frame) "akka.actor"))))))
 
 (deftest test-unmarked-frames-are-reduced-to-dots
-  (let [stack-source "sendMessage:410, ActorCell (akka.event)<
+  (let [stack-source "> sendMessage:410, ActorCell (akka.event)
                       addLogger:205, LoggingBus (akka.event)
-                      thirdMethod:53, LoggingBus (foobar)   <
+                      > thirdMethod:53, LoggingBus (foobar)
                       secondMethod:53, LoggingBus (foobar)
                       firstMethod:129, LoggingBus (foobar)
-                      apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)<"
+                      > apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"
         [frame1 frame2 frame3 frame4 frame5] (stack-from-source stack-source)]
     (testing (is (and
                   (and (= (:package frame1) "akka.event") (= (:classname frame1) "LoggingBus$$Lambda/0x000000e0011f5b90") (= (:method frame1) "apply"))
@@ -66,9 +66,9 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-unmarked-frames-at-top-and-botton-are-ignored
   (let [stack-source "sendMessage:410, ActorCell (akka.event)
-                      addLogger:205, LoggingBus (akka.event) <
+                      > addLogger:205, LoggingBus (akka.event)
                       thirdMethod:53, LoggingBus (foobar)   
-                      secondMethod:53, LoggingBus (foobar) <
+                      > secondMethod:53, LoggingBus (foobar)
                       firstMethod:129, LoggingBus (foobar)
                       apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"
         [frame1 frame2 frame3] (stack-from-source stack-source)]
@@ -108,12 +108,12 @@ tell:131, ActorRef (akka.actor)")
 
 (deftest test-marked-packages-graph
   (testing (let [stack-source "sendMessage:163, Dispatch (akka.actor.dungeon)
-                               sendMessage$:157, Dispatch (akka.actor.dungeon) <
-                               sendMessage:410, ActorCell (akka.other) <
+                               > sendMessage$:157, Dispatch (akka.actor.dungeon)
+                               > sendMessage:410, ActorCell (akka.other)
                                sendMessage:410, ActorCell (akka.actor)
-                               addLogger:205, LoggingBus (akka.event) <
+                               > addLogger:205, LoggingBus (akka.event)
                                $anonfun$startDefaultLoggers$4:129, LoggingBus (akka.event)
-                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
+                               > apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= [{:from "akka.event" :to "akka.event" :skipped true}
                      {:from "akka.event" :to "akka.other" :skipped true}
                      {:from "akka.other" :to "akka.actor.dungeon"}]
@@ -150,13 +150,13 @@ tell:131, ActorRef (akka.actor)")
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))
 
 (deftest test-marked-class-graph
-  (testing (let [stack-source "sendMessage:410, ActorCell (akka.event)<
+  (testing (let [stack-source "> sendMessage:410, ActorCell (akka.event)
                                addLogger:205, LoggingBus (akka.event)
-                               thirdMethod:205, ThirdLoggingBus (akka.event) <
-                               secondMethod:205, SecondLoggingBus (akka.event) <
+                               > thirdMethod:205, ThirdLoggingBus (akka.event)
+                               > secondMethod:205, SecondLoggingBus (akka.event)
                                firstMethod:205, LoggingBus (akka.event)
                                $anonfun$startDefaultLoggers$4:129, LoggingBus (foobar)
-                               apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event) <"]
+                               > apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "akka.event:SecondLoggingBus" :label "secondMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/SecondLoggingBus.java#L205" :skipped true}
                           {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ThirdLoggingBus.java#L205"}
                           {:from "akka.event:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410" :skipped true}])

@@ -13,16 +13,16 @@
 (def split-frame #(clojure.string/split % #":|,\s|\s\(|\)"))
 
 (defn marked+? [line]
-  (= (last line) \<))
+  (= (first line) \>))
 
 (defn marked-? [line]
-  (= (last line) \-))
+  (= (first line) \-))
 
 (defn marked? [line]
   (or (marked+? line) (marked-? line)))
 
 (defn mark- [line]
-  (str line "-"))
+  (str "-" line))
 
 (defn mark-lines [lines]
   (if (not-any? marked+? lines)
@@ -30,7 +30,7 @@
     (map #(if (marked+? %) % (mark- %)) lines)))
 
 (defn unmark-line [line]
-  (if (marked? line) (subs line 0 (dec (count line))) line))
+  (if (marked? line) (subs line 1 (count line)) line))
 
 (defn unmark+-lines [lines]
   (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
@@ -60,7 +60,7 @@
   (drop-while marked-? (drop-while-from-last marked-? lines)))
 
 (defn stack-from-source [source]
-  (let [lines (split-lines source #"\n")
+  (let [lines (map string/trim (split-lines source #"\n"))
         stack-frames-source (unmark+-lines (trim-top-bottom-marked--lines (collapse-marked--lines (mark-lines lines))))]
     (reverse (map stack-frame-from-source
                   stack-frames-source))))
@@ -107,7 +107,6 @@
                                                                                                           (:line-number next-stack-frame)))})
                     (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
                             (partition 2 1 stack))))]
-    (tee edges)
     (make-graph-from-nodes-and-edges nodes edges)))
 
 (defn classes-graph-from-sources [sources base-url extension]
