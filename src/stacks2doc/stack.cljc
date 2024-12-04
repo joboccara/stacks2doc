@@ -84,6 +84,9 @@
      (mark-skipped (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (:package stack-frame))
                                                                      :to (if (:skipped next-stack-frame) :skipped (:package next-stack-frame))})
                                (remove (fn [[stack-frame next-stack-frame]] (same-package? stack-frame next-stack-frame)) (partition 2 1 stack)))))))
+(defn package-graph-from-sources [sources]
+  (let [graphs (map packages-graph sources)]
+    (merge-graphs graphs)))
 
 (defn same-class? [stack-frame1 stack-frame2]
   (let [keys [:classname :package]]

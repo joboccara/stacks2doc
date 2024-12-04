@@ -2,7 +2,7 @@
   (:require
    [reagent.core :as r]
    [stacks2doc.mermaid :refer [to-flowchart]]
-   [stacks2doc.stack :refer [classes-graph-from-sources packages-graph]]))
+   [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]))
 
 (declare mermaid-output raw-output remove-nth stack-input)
 
@@ -49,7 +49,7 @@
                                                            (classes-graph-from-sources @stack-sources
                                                                                        @base-url
                                                                                        @file-extension)
-                                                           (packages-graph (first @stack-sources)))
+                                                           (package-graph-from-sources @stack-sources))
                                                          :detailed @use-classes-graph
                                                          :label @use-label) "graph")
          (catch :default _
