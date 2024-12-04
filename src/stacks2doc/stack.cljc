@@ -68,7 +68,7 @@
 (defn mark-skipped [edges]
   (reduce (fn [result edge]
             (if (= (:from edge) :skipped)
-              (conj (vec (butlast result)) (assoc (last result) :to (:to edge) :label (:label edge) :skipped true))
+              (conj (vec (butlast result)) (assoc (last result) :to (:to edge) :label (:label edge) :link (:link edge) :skipped true))
               (conj result edge)))
           []
           edges))
@@ -107,6 +107,7 @@
                                                                                                           (:line-number next-stack-frame)))})
                     (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
                             (partition 2 1 stack))))]
+    (tee edges)
     (make-graph-from-nodes-and-edges nodes edges)))
 
 (defn classes-graph-from-sources [sources base-url extension]
