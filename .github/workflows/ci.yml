@@ -1,4 +1,4 @@
-name: Clojure CI
+name: CI
 
 on: [push, pull_request]
 
@@ -8,7 +8,28 @@ env:
   LEIN_VERSION: 2.11.2
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache npm dependencies
+        uses: actions/cache@v2
+        with:
+          path: "~/node_modules"
+          key: deps-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: deps-node-
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Upload page
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "public"
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +49,24 @@ jobs:
             ~/.m2/repository
             ~/.gitlibs
             ~/.deps.clj
-          key: cljdeps-${{ hashFiles('project.clj') }}
-          restore-keys: cljdeps-
+          key: deps-clj-${{ hashFiles('project.clj') }}
+          restore-keys: deps-clj-
       - name: Run tests
         run: lein test
+  deploy:
+    name: "Deploy"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
