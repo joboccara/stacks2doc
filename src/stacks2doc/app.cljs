@@ -60,7 +60,6 @@
            "Error: Invalid stack trace format."]))])))
 
 
-
 (defn stack-input [stack-sources-ref stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
          :key (str "diagram-input-" position)}
