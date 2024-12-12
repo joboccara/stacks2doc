@@ -91,11 +91,14 @@
 (defn diagram-to-png [id]
   (let [diagram-element (js/document.getElementById id)]
     (let [previous-boxShadow (.-style.boxShadow diagram-element)]
-      (set! (.-style.boxShadow diagram-element) "unset") ; box-shadow is not supported by html2canvas and greys out part of the image
+      (set! (.-style.boxShadow diagram-element) "unset") ; box-shadow is not supported by html2canvas and grays out part of the image
       (.then (js/html2canvas diagram-element)
             (fn [canvas]
-              (let [data-url (.toDataURL canvas "image/png")]
-                (js/console.log data-url))))
+              (.toBlob canvas
+                (fn [blob]
+                  (-> js/navigator.clipboard
+                    (.write [(js/ClipboardItem. (clj->js {"image/png" blob}))])))
+                "image/png")))
       (set! (.-style.boxShadow diagram-element) previous-boxShadow))))
 
 (defn mermaid-output [diagram id]
@@ -103,7 +106,8 @@
     (set! *warn-on-infer* false)
     (.then promise (fn [result] (set! (.-innerHTML (js/document.getElementById id)) (.-svg result))))
     (set! *warn-on-infer* true)
-    [:div
-     [:button {:on-click #(diagram-to-png id)} "Copy"]
+    [:div {:class "space-y-2"}
+     [:button {:class  "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+               :on-click #(diagram-to-png id)} "📋 Copy to clipboard"]
      [:div {:id id
             :class "bg-gray-100 p-4 border border-gray-300 rounded-md shadow-md overflow-auto"}]]))
