@@ -143,8 +143,10 @@ tell:131, ActorRef (akka.actor)")
                                addLogger:205, LoggingBus (akka.event)
                                secondMethod:53, LoggingBus (foobar)
                                firstMethod:129, LoggingBus (foobar)
+                               firstMethod:129, LoggingBus (foobar)
                                apply:-1, LoggingBus$$Lambda/0x000000e0011f5b90 (akka.event)"]
              (is (= (set [{:from "akka.event:LoggingBus$$Lambda/0x000000e0011f5b90" :to "foobar:LoggingBus" :label "firstMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/foobar/LoggingBus.java#L129"}
+                          {:from "foobar:LoggingBus" :to "foobar:LoggingBus" :label "secondMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/foobar/LoggingBus.java#L53"}
                           {:from "foobar:LoggingBus" :to "akka.event:LoggingBus" :label "addLogger" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/LoggingBus.java#L205"}
                           {:from  "akka.event:LoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410"}])
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))

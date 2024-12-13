@@ -88,8 +88,8 @@
   (let [graphs (map packages-graph sources)]
     (merge-graphs graphs)))
 
-(defn same-class? [stack-frame1 stack-frame2]
-  (let [keys [:classname :package]]
+(defn same-method? [stack-frame1 stack-frame2]
+  (let [keys [:classname :package :method]]
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
@@ -108,7 +108,7 @@
                                                                                                           (:package next-stack-frame)
                                                                                                           (:classname next-stack-frame)
                                                                                                           (:line-number next-stack-frame)))})
-                    (remove (fn [[stack-frame next-stack-frame]] (same-class? stack-frame next-stack-frame))
+                    (remove (fn [[stack-frame next-stack-frame]] (same-method? stack-frame next-stack-frame))
                             (partition 2 1 stack))))]
     (make-graph-from-nodes-and-edges nodes edges)))
 
