@@ -6,8 +6,8 @@
 
 (declare mermaid-output raw-output remove-nth stack-input)
 
-(def use-classes-graph (r/atom false))
-(def use-label (r/atom false))
+(def use-classes-graph (r/atom true))
+(def use-label (r/atom true))
 (def use-debugging (r/atom false))
 (def base-url (r/atom "https://github.com/DataDog/logs-backend/blob/prod/domains/event-platform/shared/libs/service/src/main/java"))
 (def file-extension (r/atom "java"))
