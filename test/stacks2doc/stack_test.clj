@@ -3,8 +3,11 @@
    [clojure.test :refer [deftest is testing]]
    [stacks2doc.github :refer [github-link]]
    [stacks2doc.graph :refer [all-edges]]
-   [stacks2doc.stack :refer [classes-graph-from-one-source packages-graph
-                             stack-frame-from-source stack-from-source]]
+   [stacks2doc.stack :refer [classes-graph-from-one-source
+                             classes-graph-from-sources
+                             packages-graph
+                             stack-frame-from-source
+                             stack-from-source]]
    [stacks2doc.utils :refer [tee]]))
 
 (deftest test-empty-stack
@@ -163,3 +166,16 @@ tell:131, ActorRef (akka.actor)")
                           {:from "akka.event:SecondLoggingBus" :to "akka.event:ThirdLoggingBus" :label "thirdMethod" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ThirdLoggingBus.java#L205"}
                           {:from "akka.event:ThirdLoggingBus" :to "akka.event:ActorCell" :label "sendMessage" :link "https://github.com/DataDog/logs-backend/tree/prod/domains/event-platform/shared/libs/service/src/main/java/akka/event/ActorCell.java#L410" :skipped true}])
                     (set (all-edges (classes-graph-from-one-source stack-source TEST_BASE_URL TEST_EXTENSION))))))))
+
+(deftest test-class-graph-two-marked-stacks
+  (let [stack-source1 "> method31:31, Class3 (package3)
+                       method21:21, Class21 (package21)
+                       > method1:1, Class1 (package1)"
+        stack-source2 "> method32:32, Class3 (package3)
+                       method22:22, Class22 (package22)
+                       > method1:1, Class1 (package1)"
+        edges-set (set (all-edges (classes-graph-from-sources [stack-source1 stack-source2] "" "")))]
+  (testing
+   (is (= (set [{:from "package1:Class1" :to "package3:Class3" :label "method31" :link "/package3/Class3.#L31" :skipped true}
+                {:from "package1:Class1" :to "package3:Class3" :label "method32" :link "/package3/Class3.#L32" :skipped true}])
+          edges-set)))))
