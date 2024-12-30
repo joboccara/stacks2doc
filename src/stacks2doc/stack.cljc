@@ -40,14 +40,17 @@
 (defn unmark+-lines [lines]
   (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
 
-(defn stack-frame-from-source [source-frame language]
-  (if (marked-? source-frame)
-    {:skipped true}
-    (let [frame-parts (split-frame (string/trim (unmark-line source-frame)))]
+(defn stack-frame-from-java-source [source-frame]
+  (let [frame-parts (split-frame (string/trim (unmark-line source-frame)))]
       {:method (:method frame-parts)
        :line-number (parse-long (:line-number frame-parts))
        :classname (:classname frame-parts)
-       :package (:package frame-parts)})))
+       :package (:package frame-parts)}))
+
+(defn stack-frame-from-source [source-frame language]
+  (if (marked-? source-frame)
+    {:skipped true}
+    (stack-frame-from-java-source source-frame)))
 
 (defn collapse-marked--lines [lines]
   (reduce (fn [result line]
