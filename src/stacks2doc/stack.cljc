@@ -40,7 +40,7 @@
 (defn unmark+-lines [lines]
   (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
 
-(defn stack-frame-from-source [source-frame]
+(defn stack-frame-from-source [source-frame language]
   (if (marked-? source-frame)
     {:skipped true}
     (let [frame-parts (split-frame (string/trim (unmark-line source-frame)))]
@@ -64,10 +64,10 @@
 (defn trim-top-bottom-marked--lines [lines]
   (drop-while marked-? (drop-while-from-last marked-? lines)))
 
-(defn stack-from-source [source]
+(defn stack-from-source [source language]
   (let [lines (map string/trim (split-lines source #"\n"))
         stack-frames-source (unmark+-lines (trim-top-bottom-marked--lines (collapse-marked--lines (mark-lines lines))))]
-    (reverse (map stack-frame-from-source
+    (reverse (map #(stack-frame-from-source % language)
                   stack-frames-source))))
 
 (defn mark-skipped [edges]
@@ -83,14 +83,14 @@
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
-(defn packages-graph [source]
-  (let [stack (stack-from-source source)]
+(defn packages-graph [source language]
+  (let [stack (stack-from-source source language)]
     (make-graph-by-edges
      (mark-skipped (map (fn [[stack-frame next-stack-frame]] {:from (if (:skipped stack-frame) :skipped (:package stack-frame))
                                                                      :to (if (:skipped next-stack-frame) :skipped (:package next-stack-frame))})
                                (remove (fn [[stack-frame next-stack-frame]] (same-package? stack-frame next-stack-frame)) (partition 2 1 stack)))))))
-(defn package-graph-from-sources [sources]
-  (let [graphs (map packages-graph sources)]
+(defn package-graph-from-sources [sources language]
+  (let [graphs (map #(packages-graph % language) sources)]
     (merge-graphs graphs)))
 
 (defn same-method? [stack-frame1 stack-frame2]
@@ -98,8 +98,8 @@
     (= (select-keys stack-frame1 keys)
        (select-keys stack-frame2 keys))))
 
-(defn classes-graph-from-one-source [source base-url extension]
-  (let [stack (stack-from-source source)
+(defn classes-graph-from-one-source [source base-url extension language]
+  (let [stack (stack-from-source source language)
         nodes (map #(hash-map :node (:classname %)
                               :in (:package %))
                    (remove #(get % :skipped) stack))
@@ -117,6 +117,6 @@
                             (partition 2 1 stack))))]
     (make-graph-from-nodes-and-edges nodes edges)))
 
-(defn classes-graph-from-sources [sources base-url extension]
-  (let [graphs (map #(classes-graph-from-one-source % base-url extension) sources)]
+(defn classes-graph-from-sources [sources base-url extension language]
+  (let [graphs (map #(classes-graph-from-one-source % base-url extension language) sources)]
     (merge-graphs graphs)))

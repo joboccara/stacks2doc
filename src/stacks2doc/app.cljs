@@ -51,8 +51,10 @@
                                                         (if @use-classes-graph
                                                           (classes-graph-from-sources @stack-sources
                                                                                       @base-url
-                                                                                      @file-extension)
-                                                          (package-graph-from-sources @stack-sources))
+                                                                                      @file-extension
+                                                                                      :java)
+                                                          (package-graph-from-sources @stack-sources
+                                                                                      :java))
                                                         :detailed @use-classes-graph
                                                         :label @use-label) "graph")
         (catch :default _
