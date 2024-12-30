@@ -47,10 +47,21 @@
        :classname (:classname frame-parts)
        :package (:package frame-parts)}))
 
+(defn empty-stack-frame [_source-frame]
+  {:method ""
+   :line-number "0"
+   :classname ""
+   :package ""})
+
+(defn stack-frame-from-source-parser [language]
+  (condp = language
+    :java stack-frame-from-java-source
+    :else empty-stack-frame))
+
 (defn stack-frame-from-source [source-frame language]
   (if (marked-? source-frame)
     {:skipped true}
-    (stack-frame-from-java-source source-frame)))
+    ((stack-frame-from-source-parser language) source-frame)))
 
 (defn collapse-marked--lines [lines]
   (reduce (fn [result line]
