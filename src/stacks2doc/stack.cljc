@@ -10,13 +10,6 @@
   (comp #(remove empty? %)
         string/split))
 
-(defn split-frame [stack-frame-source]
-  (let [parts (clojure.string/split stack-frame-source #":|,\s|\s\(|\)")]
-    {:method (nth parts 0)
-     :line-number (nth parts 1)
-     :classname (nth parts 2)
-     :package (nth parts 3)}))
-
 (defn marked+? [line]
   (= (first line) \>))
 
@@ -41,11 +34,19 @@
   (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
 
 (defn stack-frame-from-java-source [source-frame]
-  (let [frame-parts (split-frame (string/trim (unmark-line source-frame)))]
-      {:method (:method frame-parts)
-       :line-number (parse-long (:line-number frame-parts))
-       :classname (:classname frame-parts)
-       :package (:package frame-parts)}))
+  (let [frame-parts (clojure.string/split source-frame #":|,\s|\s\(|\)")]
+      {:method (nth frame-parts 0)
+       :line-number (parse-long (nth frame-parts 1))
+       :classname (nth frame-parts 2)
+       :package (nth frame-parts 3)}))
+
+(defn stack-frame-from-go-source [source-frame]
+  (let [pattern #"^([^.]+)\.([^\s]+).+/([^/]+):(\d+)\)"
+        matches (re-matches pattern source-frame)]
+    {:classname (nth matches 1)
+     :method (nth matches 2)
+     :package (nth matches 3)
+     :line-number (parse-long (nth matches 4))}))
 
 (defn empty-stack-frame [_source-frame]
   {:method ""
@@ -56,12 +57,13 @@
 (defn stack-frame-from-source-parser [language]
   (condp = language
     :java stack-frame-from-java-source
-    :else empty-stack-frame))
+    :go stack-frame-from-go-source
+    empty-stack-frame))
 
 (defn stack-frame-from-source [source-frame language]
   (if (marked-? source-frame)
     {:skipped true}
-    ((stack-frame-from-source-parser language) source-frame)))
+    ((stack-frame-from-source-parser language) (string/trim (unmark-line source-frame)))))
 
 (defn collapse-marked--lines [lines]
   (reduce (fn [result line]

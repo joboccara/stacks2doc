@@ -41,7 +41,7 @@ tell:131, ActorRef (akka.actor)")
                  stack-frame (first stack)]
              (is (= "com.example.chat" (:package stack-frame))))))
 
-(deftest test-parse-source
+(deftest test-parse-java-source
   (testing (let [[first-frame second-frame] (stack-from-source TEST_CALL_STACK :java)]
              (is (and (= (:method second-frame) "$bang")
                       (= (:line-number second-frame) 182)
@@ -51,6 +51,20 @@ tell:131, ActorRef (akka.actor)")
                       (= (:line-number first-frame) 131)
                       (= (:classname first-frame) "ActorRef")
                       (= (:package first-frame) "akka.actor"))))))
+
+(def TEST_GO_CALL_STACK "resource.testStepNewConfig.func5 (/go/pkg/mod/github.com/hashicorp/terraform-plugin-testing@v1.4.0/helper/resource/testing_new_config.go:89)
+resource.runProviderCommand (/go/pkg/mod/github.com/hashicorp/terraform-plugin-testing@v1.4.0/helper/resource/plugin.go:438)")
+
+(deftest test-parse-go-source
+  (testing (let [[first-frame second-frame] (stack-from-source TEST_GO_CALL_STACK :go)]
+             (and (is (= (:method second-frame) "testStepNewConfig.func5"))
+                  (is (= (:line-number second-frame) 89))
+                  (is (= (:classname second-frame) "resource"))
+                  (is (= (:package second-frame) "testing_new_config.go"))
+                  (is (= (:method first-frame) "runProviderCommand"))
+                  (is (= (:line-number first-frame) 438))
+                  (is (= (:classname first-frame) "resource"))
+                  (is (= (:package first-frame) "plugin.go"))))))
 
 (deftest test-unmarked-frames-are-reduced-to-dots
   (let [stack-source "> sendMessage:410, ActorCell (akka.event)
