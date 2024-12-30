@@ -11,7 +11,11 @@
         string/split))
 
 (defn split-frame [stack-frame-source]
-  (clojure.string/split stack-frame-source #":|,\s|\s\(|\)"))
+  (let [parts (clojure.string/split stack-frame-source #":|,\s|\s\(|\)")]
+    {:method (nth parts 0)
+     :line-number (nth parts 1)
+     :classname (nth parts 2)
+     :package (nth parts 3)}))
 
 (defn marked+? [line]
   (= (first line) \>))
@@ -39,11 +43,11 @@
 (defn stack-frame-from-source [source-frame]
   (if (marked-? source-frame)
     {:skipped true}
-    (let [[method line-number classname package] (split-frame (string/trim (unmark-line source-frame)))]
-      {:method method
-       :line-number (parse-long line-number)
-       :classname classname
-       :package package})))
+    (let [frame-parts (split-frame (string/trim (unmark-line source-frame)))]
+      {:method (:method frame-parts)
+       :line-number (parse-long (:line-number frame-parts))
+       :classname (:classname frame-parts)
+       :package (:package frame-parts)})))
 
 (defn collapse-marked--lines [lines]
   (reduce (fn [result line]
