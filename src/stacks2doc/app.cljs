@@ -14,9 +14,8 @@
 
 (defn app
   ([]
-   (app (r/atom [""]))) ; Default case, initialize empty stack sources
+   (app (r/atom [""])))
   ([stack-sources]
-   ;; Main app logic here
    (fn []
      [:div {:class "p-4 space-y-4"}
       [:div {:class "space-x-4"}
@@ -27,6 +26,11 @@
          [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
                    :on-click #(swap! use-label not)}
           (if @use-label "Hide method calls" "Show method calls")])
+       [:select {:id "fruit"
+                  :name "fruit"
+                  :class "w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}
+         [:option {:value :java } "Java"]
+         [:option {:value :go } "Go"]]
        (when false [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                              :on-click #(swap! use-debugging not)}
                     "Toggle Debug"])]
