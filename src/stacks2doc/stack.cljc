@@ -10,7 +10,8 @@
   (comp #(remove empty? %)
         string/split))
 
-(def split-frame #(clojure.string/split % #":|,\s|\s\(|\)"))
+(defn split-frame [stack-frame-source]
+  (clojure.string/split stack-frame-source #":|,\s|\s\(|\)"))
 
 (defn marked+? [line]
   (= (first line) \>))
