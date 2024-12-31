@@ -1,13 +1,15 @@
 (ns stacks2doc.app
   (:require
    [reagent.core :as r]
+   [clojure.string :as str]
    [stacks2doc.mermaid :refer [to-flowchart]]
    [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]))
 
-(declare mermaid-output raw-output remove-nth stack-input)
+(declare from-displayed-language mermaid-output raw-output remove-nth stack-input to-displayed-language)
 
 (def use-classes-graph (r/atom true))
 (def use-label (r/atom true))
+(def language (r/atom :java))
 (def use-debugging (r/atom false))
 (def base-url (r/atom "https://github.com/DataDog/logs-backend/blob/prod/domains/event-platform/shared/libs/service/src/main/java"))
 (def file-extension (r/atom "java"))
@@ -28,9 +30,11 @@
           (if @use-label "Hide method calls" "Show method calls")])
        [:select {:id "fruit"
                   :name "fruit"
-                  :class "w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"}
-         [:option {:value :java } "Java"]
-         [:option {:value :go } "Go"]]
+                  :class "w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :value (to-displayed-language @language)
+                  :on-change #(reset! language (-> % .-target .-value from-displayed-language))}
+         [:option "Java"]
+         [:option "Go"]]
        (when false [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                              :on-click #(swap! use-debugging not)}
                     "Toggle Debug"])]
@@ -56,9 +60,9 @@
                                                           (classes-graph-from-sources @stack-sources
                                                                                       @base-url
                                                                                       @file-extension
-                                                                                      :java)
+                                                                                      @language)
                                                           (package-graph-from-sources @stack-sources
-                                                                                      :java))
+                                                                                      @language))
                                                         :detailed @use-classes-graph
                                                         :label @use-label) "graph")
         (catch :default _
@@ -117,3 +121,9 @@
                :on-click #(diagram-to-png id)} "📋 Copy to clipboard"]
      [:div {:id id
             :class "bg-gray-100 p-4 border border-gray-300 rounded-md shadow-md overflow-auto"}]]))
+
+(def from-displayed-language
+  (comp keyword str/lower-case))
+
+(def to-displayed-language
+  (comp str/capitalize name))
