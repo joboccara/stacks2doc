@@ -4,7 +4,8 @@
    [stacks2doc.github :refer [github-link]]
    [stacks2doc.graph :refer [make-graph-by-edges
                              make-graph-from-nodes-and-edges merge-graphs]]
-   [stacks2doc.utils :refer [tee]]))
+   [stacks2doc.utils :refer [tee]]
+   [clojure.string :as str]))
 
 (def split-lines
   (comp #(remove empty? %)
@@ -33,6 +34,14 @@
 (defn unmark+-lines [lines]
   (map (fn [line] (if (marked+? line) (unmark-line line) line)) lines))
 
+; This is useful because parentheses break mermaid graphs.
+; Doing this here creates a coupling between stack processing and mermaid. It would
+; make more sense to do this in the mermaid code but on the other hand the labels are
+; scattered through the graph structure there, so it would also create coupling,
+; between mermaid code and the graph structure
+(defn sanitize [label]
+  (str/replace label #"\(|\)" ""))
+
 (defn stack-frame-from-java-source [source-frame]
   (let [frame-parts (clojure.string/split source-frame #":|,\s|\s\(|\)")]
       {:method (nth frame-parts 0)
@@ -44,7 +53,7 @@
   (let [pattern #"^([^.]+)\.([^\s]+).+/([^/]+):(\d+)\)"
         matches (re-matches pattern source-frame)]
     {:classname (nth matches 1)
-     :method (nth matches 2)
+     :method (sanitize (nth matches 2))
      :package (nth matches 3)
      :line-number (parse-long (nth matches 4))}))
 
