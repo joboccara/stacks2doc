@@ -28,9 +28,9 @@
          [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
                    :on-click #(swap! use-label not)}
           (if @use-label "Hide method calls" "Show method calls")])
-       [:select {:id "fruit"
-                  :name "fruit"
-                  :class "w-full mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+       [:select {:id "language"
+                  :name "language"
+                  :class "mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   :value (to-displayed-language @language)
                   :on-change #(reset! language (-> % .-target .-value from-displayed-language))}
          [:option "Java"]
