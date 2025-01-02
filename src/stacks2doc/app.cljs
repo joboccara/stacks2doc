@@ -5,7 +5,8 @@
    [stacks2doc.mermaid :refer [to-flowchart]]
    [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]))
 
-(declare from-displayed-language mermaid-output raw-output remove-nth stack-input to-displayed-language)
+(declare debug-button from-displayed-language mermaid-output package-button raw-output remove-nth
+         repo-inputs select-language stack-input to-displayed-language use-label-button)
 
 (def use-classes-graph (r/atom true))
 (def use-label (r/atom true))
@@ -21,39 +22,13 @@
    (fn []
      [:div {:class "p-4 space-y-4"}
       [:div {:class "space-x-4"}
-       [:button {:class "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                 :on-click #(swap! use-classes-graph not)}
-        (if @use-classes-graph "Display package diagram" "Display class diagram")]
-       (when @use-classes-graph
-         [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
-                   :on-click #(swap! use-label not)}
-          (if @use-label "Hide method calls" "Show method calls")])
-       [:select {:id "language"
-                  :name "language"
-                  :class "mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  :value (to-displayed-language @language)
-                  :on-change #(reset! language (-> % .-target .-value from-displayed-language))}
-         [:option "Java"]
-         [:option "Go"]]
-       (when false [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-                             :on-click #(swap! use-debugging not)}
-                    "Toggle Debug"])]
-      [:div {:class "space-y-2"}
-       [:div {:class "flex items-center space-x-2"}
-        [:label {:class "font-bold text-gray-700 w-32"} "Base URL"]
-        [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                 :type "text"
-                 :value (or @base-url "")
-                 :on-change #(reset! base-url (-> % .-target .-value))}]]
-       [:div {:class "flex items-center space-x-2"}
-        [:label {:class "font-bold text-gray-700 w-32"} "File Extension"]
-        [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
-                 :type "text"
-                 :value (or @file-extension ".java")
-                 :on-change #(reset! file-extension (-> % .-target .-value))}]]]
+       (package-button use-classes-graph)
+       (when @use-classes-graph (use-label-button use-label))
+       (select-language language)
+       (when false (debug-button use-debugging))]
+      (repo-inputs base-url file-extension)
       [:div {:class "grid grid-cols-3 gap-4"}
-       (let [stack-sources-value @stack-sources]
-         (map #(stack-input stack-sources stack-sources-value %) (vec (range (count @stack-sources)))))]
+      (map #(stack-input stack-sources @stack-sources %) (vec (range (count @stack-sources))))]
       (try
         ((if @use-debugging raw-output mermaid-output) (to-flowchart
                                                         (if @use-classes-graph
@@ -69,6 +44,44 @@
           [:div {:class "text-red-500 font-bold"}
            "Error: Invalid stack trace format."]))])))
 
+(defn package-button [use-classes-graph]
+  [:button {:class "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                   :on-click #(swap! use-classes-graph not)}
+          (if @use-classes-graph "Display package diagram" "Display class diagram")])
+
+(defn use-label-button [use-label]
+  [:button {:class "bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                     :on-click #(swap! use-label not)}
+            (if @use-label "Hide method calls" "Show method calls")])
+
+(defn select-language [language]
+  [:select {:id "language"
+                  :name "language"
+                  :class "mt-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  :value (to-displayed-language @language)
+                  :on-change #(reset! language (-> % .-target .-value from-displayed-language))}
+         [:option "Java"]
+         [:option "Go"]])
+
+(defn repo-inputs [base-url file-extension]
+  [:div {:class "space-y-2"}
+       [:div {:class "flex items-center space-x-2"}
+        [:label {:class "font-bold text-gray-700 w-32"} "Base URL"]
+        [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                 :type "text"
+                 :value (or @base-url "")
+                 :on-change #(reset! base-url (-> % .-target .-value))}]]
+       [:div {:class "flex items-center space-x-2"}
+        [:label {:class "font-bold text-gray-700 w-32"} "File Extension"]
+        [:input {:class "p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                 :type "text"
+                 :value (or @file-extension ".java")
+                 :on-change #(reset! file-extension (-> % .-target .-value))}]]])
+
+(defn debug-button [use-debugging]
+  [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                             :on-click #(swap! use-debugging not)}
+                    "Toggle Debug"])
 
 (defn stack-input [stack-sources-ref stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
