@@ -9,3 +9,18 @@
                          {:source "stack3"}]}]
      (is (= (decode (encode input))
             input)))))
+
+(deftest encoding-decoding-is-identity-with-whitespace
+  (testing
+   (let [input {:stacks [{:source "stack 1"}
+                         {:source "stack\t2"}
+                         {:source "stack\n3"}]}]
+     (is (= (decode (encode input))
+            input)))))
+
+(deftest encoding-has-no-whitespace
+  (testing
+   (let [input {:stacks [{:source "stack 1"}
+                         {:source "stack\t2"}
+                         {:source "stack\n3"}]}]
+     (is (not (re-find #"\s" (encode input)))))))
