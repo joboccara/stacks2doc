@@ -3,11 +3,11 @@
 
 (import java.util.Base64)
 
-(defn from-base64 [to-decode]
-  (String. (.decode (Base64/getDecoder) to-decode)))
+(defn from-base64 [input_base64]
+  (String. (.decode (Base64/getDecoder) input_base64)))
 
-(defn to-base64 [to-encode]
-  (.encodeToString (Base64/getEncoder) (.getBytes to-encode)))
+(defn to-base64 [input_str]
+  (.encodeToString (Base64/getEncoder) (.getBytes input_str)))
 
 (def from-json cheshire/parse-string)
 
