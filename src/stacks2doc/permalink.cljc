@@ -1,9 +1,31 @@
 (ns stacks2doc.permalink
-  (:require [clojure.walk]
-            [stacks2doc.platform.platform :refer [from-base64 from-json to-base64 to-json]]))
+  (:require
+   [clojure.string :as string]
+   [clojure.walk]
+   [stacks2doc.platform.platform :refer [from-base64 from-json to-base64
+                                         to-json]]))
+
+(defn base-64-to-url [input_base64]
+  (-> input_base64
+      (string/replace "+" "-")
+      (string/replace "/" "_")
+      (string/replace "=" "~")))
+
+(defn url-to-base64 [input_base64]
+  (-> input_base64
+      (string/replace "-" "+")
+      (string/replace "_" "/")
+      (string/replace "~" "=")))
 
 (defn encode [input]
-  (to-base64 (to-json input)))
+  (-> input
+      to-json
+      to-base64
+      base-64-to-url))
 
 (defn decode [input]
-  (clojure.walk/keywordize-keys (from-json (from-base64 input))))
+  (-> input
+      url-to-base64
+      from-base64
+      from-json
+      clojure.walk/keywordize-keys))
