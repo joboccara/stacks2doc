@@ -4,11 +4,12 @@
    [clojure.string :as str]
    [stacks2doc.mermaid :refer [to-flowchart]]
    [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]
-   [stacks2doc.permalink :as permalinks]))
+   [stacks2doc.permalink :as permalinks]
+   [stacks2doc.query-strings :as query-strings]))
 
 (declare debug-button from-displayed-language mermaid-output package-button permalink-button
-         raw-output remove-nth repo-inputs select-language stack-input to-displayed-language
-         use-label-button)
+         raw-output remove-nth repo-inputs select-language stacks-from-query-string
+         stack-input to-displayed-language use-label-button)
 
 (def use-classes-graph (r/atom true))
 (def use-label (r/atom true))
@@ -17,9 +18,11 @@
 (def base-url (r/atom "https://github.com/DataDog/logs-backend/blob/prod/domains/event-platform/shared/libs/service/src/main/java"))
 (def file-extension (r/atom "java"))
 
+(defn tee [value] (js/console.log "tee" value) value)
+
 (defn app
   ([]
-   (app (r/atom [""])))
+   (app (r/atom (stacks-from-query-string))))
   ([stack-sources]
    (fn []
      [:div {:class "p-4 space-y-4"}
@@ -85,18 +88,20 @@
                              :on-click #(swap! use-debugging not)}
                     "Toggle Debug"])
 
-(defn add-to-query-strings [query-strings key value]
-  (str (if (empty? query-strings) "?" "&")
-       key
-       "="
-       value))
-
 (defn copy-permalink [stack-sources]
   (let [stacks {:stacks (map (fn [stack-source] {:source stack-source}) stack-sources)}
         encoded-stacks (permalinks/encode stacks)
         permalink (str (.-href js/window.location)
-                       (add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
+                       (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
         (.writeText (.-clipboard js/navigator) permalink)))
+
+(defn stacks-from-query-string []
+  (let [query-strings (.-search js/window.location)
+        query-strings-map (query-strings/query-strings-to-map query-strings)
+        query-string-stacks (permalinks/decode (get query-strings-map "stacks"))]
+    (if query-string-stacks
+      (map #(:source %) (:stacks query-string-stacks))
+      [""])))
 
 (defn permalink-button [stack-sources]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
