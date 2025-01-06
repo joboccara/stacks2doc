@@ -3,10 +3,12 @@
    [reagent.core :as r]
    [clojure.string :as str]
    [stacks2doc.mermaid :refer [to-flowchart]]
-   [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]))
+   [stacks2doc.stack :refer [classes-graph-from-sources package-graph-from-sources]]
+   [stacks2doc.permalink :as permalinks]))
 
-(declare debug-button from-displayed-language mermaid-output package-button raw-output remove-nth
-         repo-inputs select-language stack-input to-displayed-language use-label-button)
+(declare debug-button from-displayed-language mermaid-output package-button permalink-button
+         raw-output remove-nth repo-inputs select-language stack-input to-displayed-language
+         use-label-button)
 
 (def use-classes-graph (r/atom true))
 (def use-label (r/atom true))
@@ -25,7 +27,8 @@
        (package-button use-classes-graph)
        (when @use-classes-graph (use-label-button use-label))
        (select-language language)
-       (when false (debug-button use-debugging))]
+       (when false (debug-button use-debugging))
+       (permalink-button @stack-sources)]
       (repo-inputs base-url file-extension)
       [:div {:class "grid grid-cols-3 gap-4"}
       (map #(stack-input stack-sources @stack-sources %) (vec (range (count @stack-sources))))]
@@ -62,7 +65,6 @@
                   :on-change #(reset! language (-> % .-target .-value from-displayed-language))}
          [:option "Java"]
          [:option "Go"]])
-
 (defn repo-inputs [base-url file-extension]
   [:div {:class "space-y-2"}
        [:div {:class "flex items-center space-x-2"}
@@ -82,6 +84,24 @@
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                              :on-click #(swap! use-debugging not)}
                     "Toggle Debug"])
+
+(defn add-to-query-strings [query-strings key value]
+  (str (if (empty? query-strings) "?" "&")
+       key
+       "="
+       value))
+
+(defn copy-permalink [stack-sources]
+  (let [stacks {:stacks (map (fn [stack-source] {:source stack-source}) stack-sources)}
+        encoded-stacks (permalinks/encode stacks)
+        permalink (str (.-href js/window.location)
+                       (add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
+        (.writeText (.-clipboard js/navigator) permalink)))
+
+(defn permalink-button [stack-sources]
+  [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                             :on-click #(copy-permalink stack-sources)}
+                    "Copy permalink"])
 
 (defn stack-input [stack-sources-ref stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
