@@ -34,7 +34,8 @@
        (permalink-button @stack-sources)]
       (repo-inputs base-url file-extension)
       [:div {:class "grid grid-cols-3 gap-4"}
-      (map #(stack-input stack-sources @stack-sources %) (vec (range (count @stack-sources))))]
+       (let [stack-sources-value @stack-sources]
+      (map #(stack-input stack-sources stack-sources-value %) (vec (range (count @stack-sources)))))]
       (try
         ((if @use-debugging raw-output mermaid-output) (to-flowchart
                                                         (if @use-classes-graph
