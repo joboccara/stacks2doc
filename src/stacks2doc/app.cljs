@@ -8,7 +8,7 @@
    [stacks2doc.query-strings :as query-strings]))
 
 (declare debug-button from-displayed-language mermaid-output package-button permalink-button
-         raw-output remove-nth repo-inputs select-language stacks-from-query-string
+         raw-output remove-nth repo-inputs select-language pop-stacks-from-query-string
          stack-input to-displayed-language use-label-button)
 
 (def use-classes-graph (r/atom true))
@@ -22,7 +22,7 @@
 
 (defn app
   ([]
-   (app (r/atom (stacks-from-query-string))))
+   (app (r/atom (pop-stacks-from-query-string))))
   ([stack-sources]
    (fn []
      [:div {:class "p-4 space-y-4"}
@@ -91,17 +91,21 @@
 (defn copy-permalink [stack-sources]
   (let [stacks {:stacks (map (fn [stack-source] {:source stack-source}) stack-sources)}
         encoded-stacks (permalinks/encode stacks)
-        permalink (str (.-href js/window.location)
+        permalink (str (.-origin js/window.location)
                        (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
         (.writeText (.-clipboard js/navigator) permalink)))
 
-(defn stacks-from-query-string []
+(defn pop-stacks-from-query-string []
   (let [query-strings (.-search js/window.location)
         query-strings-map (query-strings/query-strings-to-map query-strings)
-        query-string-stacks (permalinks/decode (get query-strings-map "stacks"))]
-    (if query-string-stacks
-      (map #(:source %) (:stacks query-string-stacks))
-      [""])))
+        query-string-stacks (permalinks/decode (or (get query-strings-map "stacks") ""))]
+    (if (= query-string-stacks {:stacks [""]})
+      [""]
+      (let [new-query-strings-map (dissoc query-strings-map "stacks")
+            new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
+            new-url (str (.-origin js/window.location) new-query-strings)]
+        (.pushState (.-history js/window) nil "" new-url)
+        (mapv #(:source %) (:stacks query-string-stacks))))))
 
 (defn permalink-button [stack-sources]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"

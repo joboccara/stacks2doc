@@ -24,8 +24,10 @@
       base-64-to-url))
 
 (defn decode [input]
-  (-> input
-      url-to-base64
-      from-base64
-      from-json
-      clojure.walk/keywordize-keys))
+  (if (empty? input)
+    {:stacks [""]}
+    (-> input
+        url-to-base64
+        from-base64
+        from-json
+        clojure.walk/keywordize-keys)))

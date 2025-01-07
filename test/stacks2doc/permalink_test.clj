@@ -24,3 +24,8 @@
                          {:source "stack\t2"}
                          {:source "stack\n3"}]}]
      (is (not (re-find #"\s" (encode input)))))))
+
+(deftest decoding-empty-string
+  (testing
+   (is (= {:stacks [""]}
+          (decode "")))))
