@@ -93,6 +93,7 @@
   (let [stacks {:stacks (map (fn [stack-source] {:source stack-source}) stack-sources)}
         encoded-stacks (permalinks/encode stacks)
         permalink (str (.-origin js/window.location)
+                       (.-pathname js/window.location)
                        (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
         (.writeText (.-clipboard js/navigator) permalink)))
 
@@ -104,7 +105,7 @@
       [""]
       (let [new-query-strings-map (dissoc query-strings-map "stacks")
             new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
-            new-url (str (.-origin js/window.location) new-query-strings)]
+            new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
         (.pushState (.-history js/window) nil "" new-url)
         (mapv #(:source %) (:stacks query-string-stacks))))))
 
