@@ -5,7 +5,7 @@
   (str "?" (subs
             (apply str
                    (flatten [query-strings
-                             (map (fn [[key value]] ["&" key "=" value]) (partition 2 keysvalues))]))
+                             (map (fn [[key value]] (str "&" key "=" value)) (partition 2 keysvalues))]))
             1)))
 
 (defn query-strings-to-map [query-strings]
