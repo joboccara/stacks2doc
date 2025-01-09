@@ -12,6 +12,11 @@
    (is (= "?key1=value1&key2=value2"
           (add-to-query-strings "?key1=value1" "key2" "value2")))))
 
+(deftest append-multiple-entries-to-query-strings
+  (testing
+   (is (= "?key1=value1&key2=value2&key3=value3"
+          (add-to-query-strings "?key1=value1" "key2" "value2" "key3" "value3")))))
+
 (deftest empty-query-strings-to-map-test
   (testing
    (is (= {}
