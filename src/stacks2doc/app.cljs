@@ -8,12 +8,11 @@
    [stacks2doc.query-strings :as query-strings]))
 
 (declare debug-button from-displayed-language mermaid-output package-button permalink-button
-         raw-output remove-nth repo-inputs select-language pop-stacks-from-query-string
+         raw-output remove-nth repo-inputs select-language pop-language-from-query-string pop-stacks-from-query-string
          stack-input to-displayed-language use-label-button)
 
 (def use-classes-graph (r/atom true))
 (def use-label (r/atom true))
-(def language (r/atom :java))
 (def use-debugging (r/atom false))
 (def base-url (r/atom "https://github.com/DataDog/logs-backend/blob/prod/domains/event-platform/shared/libs/service/src/main/java"))
 (def file-extension (r/atom "java"))
@@ -22,8 +21,9 @@
 
 (defn app
   ([]
-   (app (r/atom (pop-stacks-from-query-string))))
-  ([stack-sources]
+   (app {:stack-sources (r/atom (pop-stacks-from-query-string))
+         :language (r/atom (or (pop-language-from-query-string) :java))}))
+  ([{:keys [stack-sources language]}]
    (fn []
      [:div {:class "p-4 space-y-4"}
       [:div {:class "space-x-4"}
@@ -31,7 +31,7 @@
        (when @use-classes-graph (use-label-button use-label))
        (select-language language)
        (when false (debug-button use-debugging))
-       (permalink-button @stack-sources)]
+       (permalink-button @stack-sources @language)]
       (repo-inputs base-url file-extension)
       [:div {:class "grid grid-cols-3 gap-4"}
        (let [stack-sources-value @stack-sources]
@@ -89,12 +89,12 @@
                              :on-click #(swap! use-debugging not)}
                     "Toggle Debug"])
 
-(defn copy-permalink [stack-sources]
+(defn copy-permalink [stack-sources language]
   (let [stacks {:stacks (map (fn [stack-source] {:source stack-source}) stack-sources)}
         encoded-stacks (permalinks/encode stacks)
         permalink (str (.-origin js/window.location)
                        (.-pathname js/window.location)
-                       (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks))]
+                       (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks "language" (to-displayed-language language)))]
         (.writeText (.-clipboard js/navigator) permalink)))
 
 (defn pop-stacks-from-query-string []
@@ -109,9 +109,9 @@
         (.pushState (.-history js/window) nil "" new-url)
         (mapv #(:source %) (:stacks query-string-stacks))))))
 
-(defn permalink-button [stack-sources]
+(defn permalink-button [stack-sources language]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-                             :on-click #(copy-permalink stack-sources)}
+                             :on-click #(copy-permalink stack-sources language)}
                     "Copy permalink"])
 
 (defn stack-input [stack-sources-ref stack-sources position]
@@ -171,3 +171,15 @@
 
 (def to-displayed-language
   (comp str/capitalize name))
+
+(defn pop-language-from-query-string []
+  (let [query-strings (.-search js/window.location)
+        query-strings-map (query-strings/query-strings-to-map query-strings)
+        query-string-displayed-language (get query-strings-map "language")
+        new-query-strings-map (dissoc query-strings-map "language")
+        new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
+        new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
+    (.pushState (.-history js/window) nil "" new-url)
+    (if (nil? query-string-displayed-language)
+      nil
+      (from-displayed-language query-string-displayed-language))))
