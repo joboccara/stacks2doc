@@ -113,20 +113,7 @@
                            (let [decoded-stacks (permalinks/decode (or value ""))]
                              (if (= decoded-stacks {:stacks [""]})
                                [""]
-                               (mapv #(:source %) (:stacks decoded-stack))))))
-
-(defn pop-stacks-from-query-string []
-  (let [query-strings (.-search js/window.location)
-        query-strings-map (query-strings/query-strings-to-map query-strings)
-        query-string-stacks (get query-strings-map "stacks")
-        new-query-strings-map (dissoc query-strings-map "stacks")
-        new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
-        new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
-      (.pushState (.-history js/window) nil "" new-url)
-      (let [decoded-stack (permalinks/decode (or query-string-stacks ""))]
-        (if (= decoded-stack {:stacks [""]})
-          [""]
-          (mapv #(:source %) (:stacks decoded-stack))))))
+                               (mapv #(:source %) (:stacks decoded-stacks)))))))
 
 (defn permalink-button [stack-sources language]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
