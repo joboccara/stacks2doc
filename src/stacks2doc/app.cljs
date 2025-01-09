@@ -104,11 +104,10 @@
         new-query-strings-map (dissoc query-strings-map "stacks")
         new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
         new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
+      (.pushState (.-history js/window) nil "" new-url)
     (if (= query-string-stacks {:stacks [""]})
       [""]
-        (do
-          (.pushState (.-history js/window) nil "" new-url)
-          (mapv #(:source %) (:stacks query-string-stacks))))))
+        (mapv #(:source %) (:stacks query-string-stacks)))))
 
 (defn permalink-button [stack-sources language]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
