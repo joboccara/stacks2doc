@@ -97,17 +97,36 @@
                        (query-strings/add-to-query-strings (.-search js/window.location) "stacks" encoded-stacks "language" (to-displayed-language language)))]
         (.writeText (.-clipboard js/navigator) permalink)))
 
+(defn pop-from-query-string [key from-value]
+  (let [query-strings (.-search js/window.location)
+        query-strings-map (query-strings/query-strings-to-map query-strings)
+        query-string-value (get query-strings-map key)
+        new-query-strings-map (dissoc query-strings-map key)
+        new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
+        new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
+    (.pushState (.-history js/window) nil "" new-url)
+    (from-value query-string-value)))
+
+(defn pop-stacks-from-query-string []
+  (pop-from-query-string "stacks"
+                         (fn [value]
+                           (let [decoded-stacks (permalinks/decode (or value ""))]
+                             (if (= decoded-stacks {:stacks [""]})
+                               [""]
+                               (mapv #(:source %) (:stacks decoded-stack))))))
+
 (defn pop-stacks-from-query-string []
   (let [query-strings (.-search js/window.location)
         query-strings-map (query-strings/query-strings-to-map query-strings)
-        query-string-stacks (permalinks/decode (or (get query-strings-map "stacks") ""))
+        query-string-stacks (get query-strings-map "stacks")
         new-query-strings-map (dissoc query-strings-map "stacks")
         new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
         new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
       (.pushState (.-history js/window) nil "" new-url)
-    (if (= query-string-stacks {:stacks [""]})
-      [""]
-        (mapv #(:source %) (:stacks query-string-stacks)))))
+      (let [decoded-stack (permalinks/decode (or query-string-stacks ""))]
+        (if (= decoded-stack {:stacks [""]})
+          [""]
+          (mapv #(:source %) (:stacks decoded-stack))))))
 
 (defn permalink-button [stack-sources language]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
@@ -173,13 +192,7 @@
   (comp str/capitalize name))
 
 (defn pop-language-from-query-string []
-  (let [query-strings (.-search js/window.location)
-        query-strings-map (query-strings/query-strings-to-map query-strings)
-        query-string-displayed-language (get query-strings-map "language")
-        new-query-strings-map (dissoc query-strings-map "language")
-        new-query-strings (query-strings/map-to-query-strings new-query-strings-map)
-        new-url (str (.-origin js/window.location) (.-pathname js/window.location) new-query-strings)]
-    (.pushState (.-history js/window) nil "" new-url)
-    (if (nil? query-string-displayed-language)
-      nil
-      (from-displayed-language query-string-displayed-language))))
+  (pop-from-query-string "language"
+                         (fn [value] (if (nil? value)
+                                       nil
+                                       (from-displayed-language value)))))
