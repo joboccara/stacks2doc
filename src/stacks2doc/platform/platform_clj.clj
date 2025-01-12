@@ -12,3 +12,6 @@
 (def from-json cheshire/parse-string)
 
 (def to-json cheshire/generate-string)
+
+(def deflate identity)
+(def inflate identity)

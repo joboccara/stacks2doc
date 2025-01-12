@@ -17,3 +17,11 @@
 (def to-json
   #?(:clj p-clj/to-json
      :cljs p-cljs/to-json))
+
+(def inflate
+  #?(:clj p-clj/inflate
+     :cljs p-cljs/inflate))
+
+(def deflate
+  #?(:clj p-clj/deflate
+     :cljs p-cljs/deflate))
