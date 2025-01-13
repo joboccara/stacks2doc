@@ -118,7 +118,7 @@
 (defn permalink-button [stack-sources language]
   [:button {:class "bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                              :on-click #(copy-permalink stack-sources language)}
-                    "Copy permalink"])
+                    "Copy permalink (beta)"])
 
 (defn stack-input [stack-sources-ref stack-sources position]
   [:div {:class "flex flex-col space-y-2 p-4 border rounded-lg shadow-md bg-white"
